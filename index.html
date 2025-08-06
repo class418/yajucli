@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <title>野獣先輩クリックゲーム（Web Audio API版）</title>
+  <title>野獣先輩クリックゲーム（価格入れ替え＆ぷにアニメ）</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <style>
     body {
@@ -38,7 +38,7 @@
       background-color: transparent;
       touch-action: manipulation;
       animation: spin 5s linear infinite;
-      transition: box-shadow 0.3s ease;
+      transition: box-shadow 0.3s ease, transform 0.15s ease;
     }
     #clickerBtn.auto-clicking {
       box-shadow: none;
@@ -114,9 +114,9 @@
     let autoClickLevel = 0;
     let autoClickInterval = null;
 
-    // Web Audio API 初期化
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     let audioCtx = null;
+    let clickBuffer = null;
 
     function initAudioContext() {
       if (!audioCtx) {
@@ -124,30 +124,31 @@
       }
     }
 
-    // クリック音をWeb Audio APIで鳴らす
-    function playClickSound() {
-      if (!audioCtx) return;
-      const oscillator = audioCtx.createOscillator();
-      const gainNode = audioCtx.createGain();
-
-      oscillator.type = 'square';
-      oscillator.frequency.setValueAtTime(1000, audioCtx.currentTime);
-
-      gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
-
-      oscillator.connect(gainNode);
-      gainNode.connect(audioCtx.destination);
-
-      oscillator.start();
-      oscillator.stop(audioCtx.currentTime + 0.05);
+    function loadClickSound() {
+      fetch('./assets/click.mp3')
+        .then(response => response.arrayBuffer())
+        .then(arrayBuffer => audioCtx.decodeAudioData(arrayBuffer))
+        .then(audioBuffer => {
+          clickBuffer = audioBuffer;
+        })
+        .catch(e => console.error('音声読み込み失敗', e));
     }
 
+    function playClickSound() {
+      if (!clickBuffer || !audioCtx) return;
+      const source = audioCtx.createBufferSource();
+      source.buffer = clickBuffer;
+      source.connect(audioCtx.destination);
+      source.start();
+    }
+
+    // 価格計算（baseCost * 1.15^level）
     function calcPrice(baseCost, level) {
       return Math.floor(baseCost * Math.pow(1.15, level));
     }
 
     function currentPointsPerClick() {
-      return pointsPerClickBase + clickPowerLevel;
+      return pointsPerClickBase * (1 + 0.2 * clickPowerLevel);
     }
 
     function currentAutoClickPointsPerSec() {
@@ -171,28 +172,29 @@
       clickerBtn.classList.remove('auto-clicking');
     }
 
+    // アップグレード情報（価格入れ替え）
     const upgrades = [
       {
         id: 1,
-        name: 'クリック力強化',
-        description: 'クリックで得られるポイントが増える',
-        baseCost: 10,
-        level: 0,
-        applyUpgrade: function() {
-          this.level++;
-          clickPowerLevel = this.level;
-        }
-      },
-      {
-        id: 2,
         name: '自動クリック',
         description: '1秒ごとに自動でポイントを獲得',
-        baseCost: 50,
+        baseCost: 10,  // 価格を安く
         level: 0,
         applyUpgrade: function() {
           this.level++;
           autoClickLevel = this.level;
           if (autoClickLevel > 0) startAutoClick();
+        }
+      },
+      {
+        id: 2,
+        name: 'クリック力強化',
+        description: 'クリックで得られるポイントが増える',
+        baseCost: 50,  // 価格を高く
+        level: 0,
+        applyUpgrade: function() {
+          this.level++;
+          clickPowerLevel = this.level;
         }
       }
     ];
@@ -239,8 +241,16 @@
       });
     }
 
+    // クリック時にぷにアニメーションを付ける関数
+    function playPuniAnimation() {
+      clickerBtn.style.transition = 'transform 0.1s ease';
+      clickerBtn.style.transform = 'scale(1.1, 0.9)';
+      setTimeout(() => {
+        clickerBtn.style.transform = 'scale(1, 1)';
+      }, 100);
+    }
+
     clickerBtn.addEventListener('click', () => {
-      // iOSなどでAudioContextの状態が"suspended"ならユーザー操作時に復帰させる
       initAudioContext();
       if (audioCtx.state === 'suspended') {
         audioCtx.resume();
@@ -249,6 +259,12 @@
       points += currentPointsPerClick();
       updateScore();
       playClickSound();
+      playPuniAnimation();
+    });
+
+    window.addEventListener('load', () => {
+      initAudioContext();
+      loadClickSound();
     });
 
     createUpgradeButtons();
