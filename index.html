@@ -15,21 +15,21 @@
       height: 100vh;
       box-sizing: border-box;
     }
-      #leftPanel {
-      flex: 0.8; /* 先輩エリアを狭く */
+    #leftPanel {
+      flex: 0.8; /* 狭め */
       display: flex;
       justify-content: center;
       align-items: center;
     }
     #rightPanel {
-      width: 300px;
+      width: 320px;
       padding-left: 20px;
       border-left: 2px solid #444;
       display: flex;
       flex-direction: column;
     }
-      #clickerBtn {
-      width: 180px;  /* 小さめ */
+    #clickerBtn {
+      width: 180px;
       height: 180px;
       cursor: pointer;
       user-select: none;
@@ -40,9 +40,10 @@
       animation: spin 5s linear infinite;
       transition: box-shadow 0.3s ease;
     }
+    /* 自動クリック中の黄色いカーソルはなし */
     #clickerBtn.auto-clicking {
-      box-shadow: 0 0 15px 5px #ffd700 inset, 0 0 20px 8px #ffeb3b;
-      cursor: progress;
+      box-shadow: none;
+      cursor: pointer;
     }
     @keyframes spin {
       from { transform: rotate(0deg); }
@@ -52,16 +53,18 @@
       font-size: 24px;
       margin-bottom: 20px;
       text-align: center;
+      user-select: none;
     }
     #upgrades {
       flex-grow: 1;
       overflow-y: auto;
+      user-select: none;
     }
     .upgrade {
       background: #444;
       border-radius: 8px;
-      padding: 10px;
-      margin-bottom: 10px;
+      padding: 12px 15px;
+      margin-bottom: 12px;
       cursor: pointer;
       transition: background 0.3s ease;
       user-select: none;
@@ -72,6 +75,20 @@
     .upgrade.disabled {
       opacity: 0.5;
       cursor: not-allowed;
+    }
+    .upgrade-title {
+      font-weight: bold;
+      margin-bottom: 6px;
+    }
+    .upgrade-desc {
+      font-size: 0.9em;
+      margin-bottom: 6px;
+      color: #ccc;
+    }
+    .upgrade-info {
+      font-size: 0.9em;
+      text-align: right;
+      color: #ffd;
     }
   </style>
 </head>
@@ -88,72 +105,86 @@
 
   <script>
     let points = 0;
-    let pointsPerClick = 1;
+    let pointsPerClickBase = 1;
 
     const scoreDisplay = document.getElementById('scoreDisplay');
     const clickerBtn = document.getElementById('clickerBtn');
     const upgradesContainer = document.getElementById('upgrades');
 
-    let autoClicking = false;
+    let clickPowerLevel = 0;
+    let autoClickLevel = 0;
     let autoClickInterval = null;
 
+    function calcPrice(baseCost, level) {
+      return Math.floor(baseCost * Math.pow(1.15, level));
+    }
+
+    function currentPointsPerClick() {
+      return pointsPerClickBase + clickPowerLevel;
+    }
+
+    function currentAutoClickPointsPerSec() {
+      return 0.1 * autoClickLevel;
+    }
+
     function startAutoClick() {
-      if (autoClicking) return;
-      autoClicking = true;
-      clickerBtn.classList.add('auto-clicking');
+      if (autoClickInterval) return;
+      clickerBtn.classList.add('auto-clicking'); // でも box-shadowなしにしているので見た目変わらず
       autoClickInterval = setInterval(() => {
-        points++;
+        points += currentAutoClickPointsPerSec();
         updateScore();
         new Audio('./assets/click.mp3').play();
       }, 1000);
     }
 
     function stopAutoClick() {
-      autoClicking = false;
-      clickerBtn.classList.remove('auto-clicking');
+      if (!autoClickInterval) return;
       clearInterval(autoClickInterval);
       autoClickInterval = null;
+      clickerBtn.classList.remove('auto-clicking');
     }
 
     const upgrades = [
       {
         id: 1,
         name: 'クリック力強化',
-        description: 'クリックで得られるポイントが2倍になる',
-        cost: 10,
-        purchased: false,
-        applyUpgrade: () => { pointsPerClick = 2; }
+        description: 'クリックで得られるポイントが増える',
+        baseCost: 10,
+        level: 0,
+        applyUpgrade: function() {
+          this.level++;
+          clickPowerLevel = this.level;
+        }
       },
       {
         id: 2,
         name: '自動クリック',
-        description: '1秒ごとに自動で1ポイント獲得',
-        cost: 50,
-        purchased: false,
-        applyUpgrade: () => {
-          startAutoClick();
+        description: '1秒ごとに自動でポイントを獲得',
+        baseCost: 50,
+        level: 0,
+        applyUpgrade: function() {
+          this.level++;
+          autoClickLevel = this.level;
+          if (autoClickLevel > 0) startAutoClick();
         }
       }
     ];
 
     function updateScore() {
-      scoreDisplay.textContent = `ポイント: ${points}`;
+      scoreDisplay.textContent = `ポイント: ${points.toFixed(1)}`;
       updateUpgradeButtons();
     }
 
     function updateUpgradeButtons() {
       upgrades.forEach(upg => {
         const btn = document.getElementById('upgrade-' + upg.id);
-        if (upg.purchased) {
-          btn.classList.add('disabled');
-          btn.textContent = `${upg.name} (購入済み)`;
-        } else if (points >= upg.cost) {
+        const price = calcPrice(upg.baseCost, upg.level);
+        if (points >= price) {
           btn.classList.remove('disabled');
-          btn.textContent = `${upg.name} - コスト: ${upg.cost}`;
         } else {
           btn.classList.add('disabled');
-          btn.textContent = `${upg.name} - コスト: ${upg.cost}`;
         }
+        btn.querySelector('.upgrade-info').textContent = `レベル: ${upg.level} | 次の価格: ${price}pt`;
       });
     }
 
@@ -162,13 +193,16 @@
         const btn = document.createElement('div');
         btn.id = 'upgrade-' + upg.id;
         btn.classList.add('upgrade');
-        btn.textContent = `${upg.name} - コスト: ${upg.cost}`;
-        btn.title = upg.description;
+        btn.innerHTML = `
+          <div class="upgrade-title">${upg.name}</div>
+          <div class="upgrade-desc">${upg.description}</div>
+          <div class="upgrade-info"></div>
+        `;
 
         btn.addEventListener('click', () => {
-          if (!upg.purchased && points >= upg.cost) {
-            points -= upg.cost;
-            upg.purchased = true;
+          const price = calcPrice(upg.baseCost, upg.level);
+          if (points >= price) {
+            points -= price;
             upg.applyUpgrade();
             updateScore();
           }
@@ -179,10 +213,8 @@
     }
 
     clickerBtn.addEventListener('click', () => {
-      points += pointsPerClick;
+      points += currentPointsPerClick();
       updateScore();
-
-      // 連打しても音が重なる再生
       new Audio('./assets/click.mp3').play();
     });
 
