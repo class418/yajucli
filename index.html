@@ -24,7 +24,8 @@
     flex: 0 0 30%;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    justify-content: center; /* 縦中央 */
+    align-items: center;     /* 横中央 */
     position: relative;
   }
   #centerPanel {
@@ -51,6 +52,7 @@
     cursor: pointer;
     user-select: none;
     transition: transform 0.15s ease;
+    -webkit-user-drag: none; /* iOS長押し保存防止 */
   }
   @keyframes spin {
     from { transform: rotate(0deg); }
@@ -60,6 +62,7 @@
     font-size: 24px;
     margin-top: 10px;
     text-align: center;
+    user-select: none;
   }
   #autoClickDisplay {
     position: absolute;
@@ -71,11 +74,14 @@
     font-weight: bold;
     color: #ffeb3b;
     text-shadow: 0 0 4px #000;
+    user-select: none;
   }
   .facilityIcon {
     width: 64px;
     height: 64px;
     object-fit: contain;
+    -webkit-user-drag: none;
+    user-select: none;
   }
   .sectionTitle {
     font-weight: bold;
@@ -103,11 +109,11 @@
 
 <div id="leftPanel">
   <div id="autoClickDisplay">自動0.0/秒</div>
-  <img id="clickerBtn" src="./assets/yajuu.png" alt="野獣先輩">
+  <img id="clickerBtn" src="./assets/yajuu.png" alt="野獣先輩" draggable="false">
   <div id="scoreDisplay">ポイント: 0</div>
 </div>
 
-<div id="centerPanel" id="facilityDisplay">
+<div id="centerPanel">
   <!-- 購入施設がここに並ぶ -->
 </div>
 
@@ -177,6 +183,7 @@ function addFacilityImage(src) {
   const img = document.createElement('img');
   img.src = src;
   img.classList.add('facilityIcon');
+  img.draggable = false;
   centerPanel.appendChild(img);
 }
 
@@ -286,6 +293,19 @@ clickerBtn.addEventListener('click', () => {
   playClickSound();
   playPuniAnimation();
 });
+
+// ダブルタップズーム防止
+let lastTouchEnd = 0;
+document.addEventListener('touchend', function (e) {
+  const now = Date.now();
+  if (now - lastTouchEnd <= 300) {
+    e.preventDefault();
+  }
+  lastTouchEnd = now;
+}, { passive: false });
+
+// 長押し保存防止
+document.addEventListener('contextmenu', e => e.preventDefault());
 
 window.addEventListener('load', () => {
   initAudioContext();
