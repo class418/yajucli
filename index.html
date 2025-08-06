@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <title>野獣先輩クリックゲーム</title>
+  <title>野獣先輩クリックゲーム（Web Audio API版）</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <style>
     body {
@@ -16,7 +16,7 @@
       box-sizing: border-box;
     }
     #leftPanel {
-      flex: 0.8; /* 狭め */
+      flex: 0.8;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -40,7 +40,6 @@
       animation: spin 5s linear infinite;
       transition: box-shadow 0.3s ease;
     }
-    /* 自動クリック中の黄色いカーソルはなし */
     #clickerBtn.auto-clicking {
       box-shadow: none;
       cursor: pointer;
@@ -115,6 +114,34 @@
     let autoClickLevel = 0;
     let autoClickInterval = null;
 
+    // Web Audio API 初期化
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    let audioCtx = null;
+
+    function initAudioContext() {
+      if (!audioCtx) {
+        audioCtx = new AudioContext();
+      }
+    }
+
+    // クリック音をWeb Audio APIで鳴らす
+    function playClickSound() {
+      if (!audioCtx) return;
+      const oscillator = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+
+      oscillator.type = 'square';
+      oscillator.frequency.setValueAtTime(1000, audioCtx.currentTime);
+
+      gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+
+      oscillator.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+
+      oscillator.start();
+      oscillator.stop(audioCtx.currentTime + 0.05);
+    }
+
     function calcPrice(baseCost, level) {
       return Math.floor(baseCost * Math.pow(1.15, level));
     }
@@ -129,11 +156,11 @@
 
     function startAutoClick() {
       if (autoClickInterval) return;
-      clickerBtn.classList.add('auto-clicking'); // でも box-shadowなしにしているので見た目変わらず
+      clickerBtn.classList.add('auto-clicking');
       autoClickInterval = setInterval(() => {
         points += currentAutoClickPointsPerSec();
         updateScore();
-        new Audio('./assets/click.mp3').play();
+        playClickSound();
       }, 1000);
     }
 
@@ -213,9 +240,15 @@
     }
 
     clickerBtn.addEventListener('click', () => {
+      // iOSなどでAudioContextの状態が"suspended"ならユーザー操作時に復帰させる
+      initAudioContext();
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+
       points += currentPointsPerClick();
       updateScore();
-      new Audio('./assets/click.mp3').play();
+      playClickSound();
     });
 
     createUpgradeButtons();
