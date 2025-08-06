@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>野獣先輩クリックゲーム</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <style>
     body {
       font-family: 'Arial', sans-serif;
@@ -37,6 +38,7 @@
       transition: transform 0.1s ease;
       object-fit: contain;
       background-color: #000;
+      touch-action: manipulation; /* ダブルタップズーム防止 */
     }
     #clickerBtn:active {
       transform: scale(0.95);
@@ -66,14 +68,6 @@
       opacity: 0.5;
       cursor: not-allowed;
     }
-    .upgrade-title {
-      font-weight: bold;
-      font-size: 18px;
-    }
-    .upgrade-cost {
-      font-size: 14px;
-      color: #ccc;
-    }
   </style>
 </head>
 <body>
@@ -84,9 +78,7 @@
 
   <div id="rightPanel">
     <div id="scoreDisplay">ポイント: 0</div>
-    <div id="upgrades">
-      <!-- アップグレードはここに表示 -->
-    </div>
+    <div id="upgrades"></div>
   </div>
 
   <script>
@@ -97,10 +89,8 @@
     const clickerBtn = document.getElementById('clickerBtn');
     const upgradesContainer = document.getElementById('upgrades');
 
-    // クリック音の読み込み
     const clickSound = new Audio('./assets/click.mp3');
 
-    // アップグレードデータ
     const upgrades = [
       {
         id: 1,
@@ -136,15 +126,12 @@
         if (upg.purchased) {
           btn.classList.add('disabled');
           btn.textContent = `${upg.name} (購入済み)`;
-          btn.title = upg.description;
         } else if (points >= upg.cost) {
           btn.classList.remove('disabled');
           btn.textContent = `${upg.name} - コスト: ${upg.cost}`;
-          btn.title = upg.description;
         } else {
           btn.classList.add('disabled');
           btn.textContent = `${upg.name} - コスト: ${upg.cost}`;
-          btn.title = upg.description;
         }
       });
     }
@@ -173,13 +160,17 @@
     clickerBtn.addEventListener('click', () => {
       points += pointsPerClick;
       updateScore();
-      clickSound.currentTime = 0; // 音をすぐ鳴らすため
+      clickSound.currentTime = 0;
       clickSound.play();
-      // クリックエフェクト
       clickerBtn.style.transform = 'scale(1.1)';
       setTimeout(() => {
         clickerBtn.style.transform = 'scale(1)';
       }, 100);
+    });
+
+    // ダブルクリックでのズーム防止
+    clickerBtn.addEventListener('dblclick', (e) => {
+      e.preventDefault();
     });
 
     createUpgradeButtons();
