@@ -15,8 +15,8 @@
       height: 100vh;
       box-sizing: border-box;
     }
-    #leftPanel {
-      flex: 1;
+      #leftPanel {
+      flex: 0.8; /* 先輩エリアを狭く */
       display: flex;
       justify-content: center;
       align-items: center;
@@ -28,17 +28,21 @@
       display: flex;
       flex-direction: column;
     }
-    #clickerBtn {
-      width: 250px;
-      height: 250px;
+      #clickerBtn {
+      width: 180px;  /* 小さめ */
+      height: 180px;
       cursor: pointer;
       user-select: none;
       border-radius: 15px;
       object-fit: contain;
       background-color: transparent;
       touch-action: manipulation;
-      animation: spin 5s linear infinite; /* 常時回転 */
-      /* box-shadow は削除して黄色いオーラ無し */
+      animation: spin 5s linear infinite;
+      transition: box-shadow 0.3s ease;
+    }
+    #clickerBtn.auto-clicking {
+      box-shadow: 0 0 15px 5px #ffd700 inset, 0 0 20px 8px #ffeb3b;
+      cursor: progress;
     }
     @keyframes spin {
       from { transform: rotate(0deg); }
@@ -90,6 +94,27 @@
     const clickerBtn = document.getElementById('clickerBtn');
     const upgradesContainer = document.getElementById('upgrades');
 
+    let autoClicking = false;
+    let autoClickInterval = null;
+
+    function startAutoClick() {
+      if (autoClicking) return;
+      autoClicking = true;
+      clickerBtn.classList.add('auto-clicking');
+      autoClickInterval = setInterval(() => {
+        points++;
+        updateScore();
+        new Audio('./assets/click.mp3').play();
+      }, 1000);
+    }
+
+    function stopAutoClick() {
+      autoClicking = false;
+      clickerBtn.classList.remove('auto-clicking');
+      clearInterval(autoClickInterval);
+      autoClickInterval = null;
+    }
+
     const upgrades = [
       {
         id: 1,
@@ -106,10 +131,7 @@
         cost: 50,
         purchased: false,
         applyUpgrade: () => {
-          setInterval(() => {
-            points++;
-            updateScore();
-          }, 1000);
+          startAutoClick();
         }
       }
     ];
