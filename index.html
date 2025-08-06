@@ -1,300 +1,300 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <title>野獣先輩クリックゲーム（自動クリック表示追加）</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-  <style>
-    body {
-      font-family: 'Arial', sans-serif;
-      background-color: #282c34;
-      color: #fff;
-      margin: 0;
-      padding: 20px;
-      display: flex;
-      height: 100vh;
-      box-sizing: border-box;
-    }
-    #leftPanel {
-      flex: 0.8;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      position: relative; /* 表示用 */
-    }
-    #autoClickDisplay {
-      position: absolute;
-      top: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 14px;
-      color: #ffeb3b;
-      font-weight: bold;
-      user-select: none;
-      pointer-events: none;
-      text-shadow: 0 0 4px #000;
-      background: rgba(0,0,0,0.4);
-      padding: 2px 6px;
-      border-radius: 6px;
-      min-width: 60px;
-      text-align: center;
-    }
-    #rightPanel {
-      width: 320px;
-      padding-left: 20px;
-      border-left: 2px solid #444;
-      display: flex;
-      flex-direction: column;
-    }
-    #clickerBtn {
-      width: 180px;
-      height: 180px;
-      cursor: pointer;
-      user-select: none;
-      border-radius: 15px;
-      object-fit: contain;
-      background-color: transparent;
-      touch-action: manipulation;
-      animation: spin 5s linear infinite;
-      transition: box-shadow 0.3s ease, transform 0.15s ease;
-      display: block;
-    }
-    #clickerBtn.auto-clicking {
-      box-shadow: none;
-      cursor: pointer;
-    }
-    @keyframes spin {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-    #scoreDisplay {
-      font-size: 24px;
-      margin-bottom: 20px;
-      text-align: center;
-      user-select: none;
-    }
-    #upgrades {
-      flex-grow: 1;
-      overflow-y: auto;
-      user-select: none;
-    }
-    .upgrade {
-      background: #444;
-      border-radius: 8px;
-      padding: 12px 15px;
-      margin-bottom: 12px;
-      cursor: pointer;
-      transition: background 0.3s ease;
-      user-select: none;
-    }
-    .upgrade:hover:not(.disabled) {
-      background: #666;
-    }
-    .upgrade.disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-    .upgrade-title {
-      font-weight: bold;
-      margin-bottom: 6px;
-    }
-    .upgrade-desc {
-      font-size: 0.9em;
-      margin-bottom: 6px;
-      color: #ccc;
-    }
-    .upgrade-info {
-      font-size: 0.9em;
-      text-align: right;
-      color: #ffd;
-    }
-  </style>
+<meta charset="UTF-8">
+<title>野獣先輩クリックゲーム</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    background: #282c34;
+    color: #fff;
+    font-family: Arial, sans-serif;
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+  }
+  #leftPanel, #centerPanel, #rightPanel {
+    padding: 10px;
+    box-sizing: border-box;
+    overflow-y: auto;
+  }
+  #leftPanel {
+    flex: 0 0 30%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+  }
+  #centerPanel {
+    flex: 0 0 40%;
+    background: #333;
+    display: flex;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    gap: 5px;
+  }
+  #rightPanel {
+    flex: 0 0 30%;
+    background: #222;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+  }
+  #clickerBtn {
+    width: 180px;
+    height: 180px;
+    border-radius: 15px;
+    object-fit: contain;
+    animation: spin 5s linear infinite;
+    cursor: pointer;
+    user-select: none;
+    transition: transform 0.15s ease;
+  }
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  #scoreDisplay {
+    font-size: 24px;
+    margin-top: 10px;
+    text-align: center;
+  }
+  #autoClickDisplay {
+    position: absolute;
+    top: 5px;
+    background: rgba(0,0,0,0.4);
+    padding: 2px 6px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: bold;
+    color: #ffeb3b;
+    text-shadow: 0 0 4px #000;
+  }
+  .facilityIcon {
+    width: 64px;
+    height: 64px;
+    object-fit: contain;
+  }
+  .sectionTitle {
+    font-weight: bold;
+    margin: 10px 0 5px;
+    border-bottom: 1px solid #555;
+  }
+  .buyButton {
+    background: #444;
+    border-radius: 8px;
+    padding: 8px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .buyButton.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .buyButton:hover:not(.disabled) {
+    background: #666;
+  }
+</style>
 </head>
 <body>
 
-  <div id="leftPanel">
-    <div id="autoClickDisplay">自動0.0 /秒</div>
-    <img id="clickerBtn" src="./assets/yajuu.png" alt="野獣先輩" />
+<div id="leftPanel">
+  <div id="autoClickDisplay">自動0.0/秒</div>
+  <img id="clickerBtn" src="./assets/yajuu.png" alt="野獣先輩">
+  <div id="scoreDisplay">ポイント: 0</div>
+</div>
+
+<div id="centerPanel" id="facilityDisplay">
+  <!-- 購入施設がここに並ぶ -->
+</div>
+
+<div id="rightPanel">
+  <div>
+    <div class="sectionTitle">施設購入</div>
+    <div id="facilityButtons"></div>
   </div>
-
-  <div id="rightPanel">
-    <div id="scoreDisplay">ポイント: 0</div>
-    <div id="upgrades"></div>
+  <div>
+    <div class="sectionTitle">アップグレード</div>
+    <div id="upgradeButtons"></div>
   </div>
+</div>
 
-  <script>
-    let points = 0;
-    let pointsPerClickBase = 1;
+<script>
+let points = 0;
+let clickPowerLevel = 0;
+let autoClickLevel = 0;
+let takuyaLevel = 0;
 
-    const scoreDisplay = document.getElementById('scoreDisplay');
-    const clickerBtn = document.getElementById('clickerBtn');
-    const upgradesContainer = document.getElementById('upgrades');
-    const autoClickDisplay = document.getElementById('autoClickDisplay');
+const clickerBtn = document.getElementById('clickerBtn');
+const scoreDisplay = document.getElementById('scoreDisplay');
+const autoClickDisplay = document.getElementById('autoClickDisplay');
+const facilityButtons = document.getElementById('facilityButtons');
+const upgradeButtons = document.getElementById('upgradeButtons');
+const centerPanel = document.getElementById('centerPanel');
 
-    let clickPowerLevel = 0;
-    let autoClickLevel = 0;
-    let autoClickInterval = null;
+let autoClickInterval = null;
+const AudioContext = window.AudioContext || window.webkitAudioContext;
+let audioCtx = null;
+let clickBuffer = null;
 
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    let audioCtx = null;
-    let clickBuffer = null;
+function initAudioContext() {
+  if (!audioCtx) audioCtx = new AudioContext();
+}
+function loadClickSound() {
+  fetch('./assets/click.mp3')
+    .then(r => r.arrayBuffer())
+    .then(buf => audioCtx.decodeAudioData(buf))
+    .then(decoded => clickBuffer = decoded);
+}
+function playClickSound() {
+  if (!clickBuffer || !audioCtx) return;
+  const src = audioCtx.createBufferSource();
+  src.buffer = clickBuffer;
+  src.connect(audioCtx.destination);
+  src.start();
+}
 
-    function initAudioContext() {
-      if (!audioCtx) {
-        audioCtx = new AudioContext();
-      }
-    }
+function calcPrice(base, level) {
+  return Math.floor(base * Math.pow(1.15, level));
+}
+function pointsPerClick() {
+  return 1 * (1 + 0.2 * clickPowerLevel);
+}
+function autoClickPerSec() {
+  return autoClickLevel * 0.1 + takuyaLevel * 1.0;
+}
+function updateAutoClickDisplay() {
+  autoClickDisplay.textContent = `自動${autoClickPerSec().toFixed(1)}/秒`;
+}
+function updateScore() {
+  scoreDisplay.textContent = `ポイント: ${points.toFixed(1)}`;
+  updateButtons();
+}
+function addFacilityImage(src) {
+  const img = document.createElement('img');
+  img.src = src;
+  img.classList.add('facilityIcon');
+  centerPanel.appendChild(img);
+}
 
-    function loadClickSound() {
-      fetch('./assets/click.mp3')
-        .then(response => response.arrayBuffer())
-        .then(arrayBuffer => audioCtx.decodeAudioData(arrayBuffer))
-        .then(audioBuffer => {
-          clickBuffer = audioBuffer;
-        })
-        .catch(e => console.error('音声読み込み失敗', e));
-    }
-
-    function playClickSound() {
-      if (!clickBuffer || !audioCtx) return;
-      const source = audioCtx.createBufferSource();
-      source.buffer = clickBuffer;
-      source.connect(audioCtx.destination);
-      source.start();
-    }
-
-    function calcPrice(baseCost, level) {
-      return Math.floor(baseCost * Math.pow(1.15, level));
-    }
-
-    function currentPointsPerClick() {
-      return pointsPerClickBase * (1 + 0.2 * clickPowerLevel);
-    }
-
-    function currentAutoClickPointsPerSec() {
-      return 0.1 * autoClickLevel;
-    }
-
-    function updateAutoClickDisplay() {
-      autoClickDisplay.textContent = `自動${currentAutoClickPointsPerSec().toFixed(1)} /秒`;
-    }
-
-    function startAutoClick() {
-      if (autoClickInterval) return;
-      clickerBtn.classList.add('auto-clicking');
-      autoClickInterval = setInterval(() => {
-        points += currentAutoClickPointsPerSec();
-        updateScore();
-        playClickSound();
-      }, 1000);
-    }
-
-    function stopAutoClick() {
-      if (!autoClickInterval) return;
-      clearInterval(autoClickInterval);
-      autoClickInterval = null;
-      clickerBtn.classList.remove('auto-clicking');
-    }
-
-    const upgrades = [
-      {
-        id: 1,
-        name: '自動クリック',
-        description: '1秒ごとに自動でポイントを獲得',
-        baseCost: 10,
-        level: 0,
-        applyUpgrade: function() {
-          this.level++;
-          autoClickLevel = this.level;
-          updateAutoClickDisplay();
-          if (autoClickLevel > 0) startAutoClick();
-        }
-      },
-      {
-        id: 2,
-        name: 'クリック力強化',
-        description: 'クリックで得られるポイントが増える',
-        baseCost: 50,
-        level: 0,
-        applyUpgrade: function() {
-          this.level++;
-          clickPowerLevel = this.level;
-        }
-      }
-    ];
-
-    function updateScore() {
-      scoreDisplay.textContent = `ポイント: ${points.toFixed(1)}`;
-      updateUpgradeButtons();
-    }
-
-    function updateUpgradeButtons() {
-      upgrades.forEach(upg => {
-        const btn = document.getElementById('upgrade-' + upg.id);
-        const price = calcPrice(upg.baseCost, upg.level);
-        if (points >= price) {
-          btn.classList.remove('disabled');
-        } else {
-          btn.classList.add('disabled');
-        }
-        btn.querySelector('.upgrade-info').textContent = `レベル: ${upg.level} | 次の価格: ${price}pt`;
-      });
-    }
-
-    function createUpgradeButtons() {
-      upgrades.forEach(upg => {
-        const btn = document.createElement('div');
-        btn.id = 'upgrade-' + upg.id;
-        btn.classList.add('upgrade');
-        btn.innerHTML = `
-          <div class="upgrade-title">${upg.name}</div>
-          <div class="upgrade-desc">${upg.description}</div>
-          <div class="upgrade-info"></div>
-        `;
-
-        btn.addEventListener('click', () => {
-          const price = calcPrice(upg.baseCost, upg.level);
-          if (points >= price) {
-            points -= price;
-            upg.applyUpgrade();
-            updateScore();
-          }
-        });
-
-        upgradesContainer.appendChild(btn);
-      });
-    }
-
-    // クリック時ぷにアニメーション
-    function playPuniAnimation() {
-      clickerBtn.style.transition = 'transform 0.1s ease';
-      clickerBtn.style.transform = 'scale(1.1, 0.9)';
-      setTimeout(() => {
-        clickerBtn.style.transform = 'scale(1, 1)';
-      }, 100);
-    }
-
-    clickerBtn.addEventListener('click', () => {
-      initAudioContext();
-      if (audioCtx.state === 'suspended') {
-        audioCtx.resume();
-      }
-
-      points += currentPointsPerClick();
-      updateScore();
-      playClickSound();
-      playPuniAnimation();
-    });
-
-    window.addEventListener('load', () => {
-      initAudioContext();
-      loadClickSound();
-      updateAutoClickDisplay();
-    });
-
-    createUpgradeButtons();
+function startAutoClick() {
+  if (autoClickInterval) return;
+  autoClickInterval = setInterval(() => {
+    points += autoClickPerSec();
     updateScore();
-  </script>
+    playClickSound();
+  }, 1000);
+}
+
+const facilities = [
+  { id:'cursor', name:'自動クリック', baseCost:10, level:0, icon:'./assets/cursor.png',
+    onBuy: function(){
+      this.level++;
+      autoClickLevel = this.level;
+      addFacilityImage(this.icon);
+      updateAutoClickDisplay();
+      if (autoClickLevel > 0) startAutoClick();
+    }
+  },
+  { id:'takuya', name:'拓也さん', baseCost:100, level:0, icon:'./assets/takuya.png',
+    onBuy: function(){
+      this.level++;
+      takuyaLevel = this.level;
+      addFacilityImage(this.icon);
+      updateAutoClickDisplay();
+      if (takuyaLevel > 0) startAutoClick();
+    }
+  }
+];
+const upgrades = [
+  { id:'clickPower', name:'クリック力強化', baseCost:50, level:0,
+    onBuy:function(){
+      this.level++;
+      clickPowerLevel = this.level;
+    }
+  }
+];
+
+function createButtons() {
+  facilities.forEach(f => {
+    const btn = document.createElement('div');
+    btn.id = 'facility-'+f.id;
+    btn.classList.add('buyButton');
+    facilityButtons.appendChild(btn);
+  });
+  upgrades.forEach(u => {
+    const btn = document.createElement('div');
+    btn.id = 'upgrade-'+u.id;
+    btn.classList.add('buyButton');
+    upgradeButtons.appendChild(btn);
+  });
+  updateButtons();
+}
+
+function updateButtons() {
+  facilities.forEach(f => {
+    const btn = document.getElementById('facility-'+f.id);
+    const price = calcPrice(f.baseCost, f.level);
+    btn.textContent = `${f.name} Lv.${f.level} - ${price}pt`;
+    if (points >= price) {
+      btn.classList.remove('disabled');
+      btn.onclick = () => {
+        if (points >= price) {
+          points -= price;
+          f.onBuy();
+          updateScore();
+        }
+      };
+    } else {
+      btn.classList.add('disabled');
+      btn.onclick = null;
+    }
+  });
+  upgrades.forEach(u => {
+    const btn = document.getElementById('upgrade-'+u.id);
+    const price = calcPrice(u.baseCost, u.level);
+    btn.textContent = `${u.name} Lv.${u.level} - ${price}pt`;
+    if (points >= price) {
+      btn.classList.remove('disabled');
+      btn.onclick = () => {
+        if (points >= price) {
+          points -= price;
+          u.onBuy();
+          updateScore();
+        }
+      };
+    } else {
+      btn.classList.add('disabled');
+      btn.onclick = null;
+    }
+  });
+}
+
+function playPuniAnimation() {
+  clickerBtn.style.transform = 'scale(1.1,0.9)';
+  setTimeout(()=>clickerBtn.style.transform = 'scale(1,1)',100);
+}
+
+clickerBtn.addEventListener('click', () => {
+  initAudioContext();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  points += pointsPerClick();
+  updateScore();
+  playClickSound();
+  playPuniAnimation();
+});
+
+window.addEventListener('load', () => {
+  initAudioContext();
+  loadClickSound();
+  updateAutoClickDisplay();
+  createButtons();
+  updateScore();
+});
+</script>
 
 </body>
 </html>
