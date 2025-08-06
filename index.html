@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <title>野獣先輩クリックゲーム（価格入れ替え＆ぷにアニメ）</title>
+  <title>野獣先輩クリックゲーム（自動クリック表示追加）</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <style>
     body {
@@ -20,6 +20,24 @@
       display: flex;
       justify-content: center;
       align-items: center;
+      position: relative; /* 表示用 */
+    }
+    #autoClickDisplay {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 14px;
+      color: #ffeb3b;
+      font-weight: bold;
+      user-select: none;
+      pointer-events: none;
+      text-shadow: 0 0 4px #000;
+      background: rgba(0,0,0,0.4);
+      padding: 2px 6px;
+      border-radius: 6px;
+      min-width: 60px;
+      text-align: center;
     }
     #rightPanel {
       width: 320px;
@@ -39,6 +57,7 @@
       touch-action: manipulation;
       animation: spin 5s linear infinite;
       transition: box-shadow 0.3s ease, transform 0.15s ease;
+      display: block;
     }
     #clickerBtn.auto-clicking {
       box-shadow: none;
@@ -94,6 +113,7 @@
 <body>
 
   <div id="leftPanel">
+    <div id="autoClickDisplay">自動0.0 /秒</div>
     <img id="clickerBtn" src="./assets/yajuu.png" alt="野獣先輩" />
   </div>
 
@@ -109,6 +129,7 @@
     const scoreDisplay = document.getElementById('scoreDisplay');
     const clickerBtn = document.getElementById('clickerBtn');
     const upgradesContainer = document.getElementById('upgrades');
+    const autoClickDisplay = document.getElementById('autoClickDisplay');
 
     let clickPowerLevel = 0;
     let autoClickLevel = 0;
@@ -142,7 +163,6 @@
       source.start();
     }
 
-    // 価格計算（baseCost * 1.15^level）
     function calcPrice(baseCost, level) {
       return Math.floor(baseCost * Math.pow(1.15, level));
     }
@@ -153,6 +173,10 @@
 
     function currentAutoClickPointsPerSec() {
       return 0.1 * autoClickLevel;
+    }
+
+    function updateAutoClickDisplay() {
+      autoClickDisplay.textContent = `自動${currentAutoClickPointsPerSec().toFixed(1)} /秒`;
     }
 
     function startAutoClick() {
@@ -172,17 +196,17 @@
       clickerBtn.classList.remove('auto-clicking');
     }
 
-    // アップグレード情報（価格入れ替え）
     const upgrades = [
       {
         id: 1,
         name: '自動クリック',
         description: '1秒ごとに自動でポイントを獲得',
-        baseCost: 10,  // 価格を安く
+        baseCost: 10,
         level: 0,
         applyUpgrade: function() {
           this.level++;
           autoClickLevel = this.level;
+          updateAutoClickDisplay();
           if (autoClickLevel > 0) startAutoClick();
         }
       },
@@ -190,7 +214,7 @@
         id: 2,
         name: 'クリック力強化',
         description: 'クリックで得られるポイントが増える',
-        baseCost: 50,  // 価格を高く
+        baseCost: 50,
         level: 0,
         applyUpgrade: function() {
           this.level++;
@@ -241,7 +265,7 @@
       });
     }
 
-    // クリック時にぷにアニメーションを付ける関数
+    // クリック時ぷにアニメーション
     function playPuniAnimation() {
       clickerBtn.style.transition = 'transform 0.1s ease';
       clickerBtn.style.transform = 'scale(1.1, 0.9)';
@@ -265,6 +289,7 @@
     window.addEventListener('load', () => {
       initAudioContext();
       loadClickSound();
+      updateAutoClickDisplay();
     });
 
     createUpgradeButtons();
