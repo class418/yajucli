@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>野獣先輩クリックゲーム</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <style>
     body {
       font-family: 'Arial', sans-serif;
@@ -34,14 +34,15 @@
       cursor: pointer;
       user-select: none;
       border-radius: 15px;
-      box-shadow: 0 0 15px #ff6;
-      transition: transform 0.1s ease;
       object-fit: contain;
-      background-color: #000;
-      touch-action: manipulation; /* ダブルタップズーム防止 */
+      background-color: transparent;
+      touch-action: manipulation;
+      animation: spin 5s linear infinite; /* 常時回転 */
+      /* box-shadow は削除して黄色いオーラ無し */
     }
-    #clickerBtn:active {
-      transform: scale(0.95);
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
     }
     #scoreDisplay {
       font-size: 24px;
@@ -88,8 +89,6 @@
     const scoreDisplay = document.getElementById('scoreDisplay');
     const clickerBtn = document.getElementById('clickerBtn');
     const upgradesContainer = document.getElementById('upgrades');
-
-    const clickSound = new Audio('./assets/click.mp3');
 
     const upgrades = [
       {
@@ -160,17 +159,9 @@
     clickerBtn.addEventListener('click', () => {
       points += pointsPerClick;
       updateScore();
-      clickSound.currentTime = 0;
-      clickSound.play();
-      clickerBtn.style.transform = 'scale(1.1)';
-      setTimeout(() => {
-        clickerBtn.style.transform = 'scale(1)';
-      }, 100);
-    });
 
-    // ダブルクリックでのズーム防止
-    clickerBtn.addEventListener('dblclick', (e) => {
-      e.preventDefault();
+      // 連打しても音が重なる再生
+      new Audio('./assets/click.mp3').play();
     });
 
     createUpgradeButtons();
