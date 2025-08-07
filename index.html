@@ -97,7 +97,7 @@
             height: 300px;
             cursor: pointer;
             transition: transform 0.1s ease;
-            border-radius: 15px;
+            border-radius: 50%;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             object-fit: cover;
             touch-action: manipulation;
@@ -105,14 +105,25 @@
             -webkit-touch-callout: none;
             -webkit-tap-highlight-color: transparent;
             -ms-touch-action: manipulation;
+            animation: rotate 5s linear infinite;
+        }
+        
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
         }
         
         .yajuu-image:hover {
-            transform: scale(1.05);
+            filter: brightness(1.1);
         }
         
         .yajuu-image:active {
-            transform: scale(0.95);
+            filter: brightness(1.2);
+            animation-play-state: paused;
         }
         
         .click-effect {
@@ -563,7 +574,7 @@
         
         function buyUpgrade(upgradeKey) {
             const upgrade = gameData.upgrades[upgradeKey];
-            if (gameData.points >= upgrade.cost) {
+            if (Math.floor(gameData.points) >= upgrade.cost) {
                 gameData.points -= upgrade.cost;
                 upgrade.count++;
                 upgrade.cost = Math.floor(upgrade.cost * 1.15);
@@ -579,7 +590,7 @@
         
         function buyClickUpgrade() {
             const cost = gameData.clickPower * 100;
-            if (gameData.points >= cost) {
+            if (Math.floor(gameData.points) >= cost) {
                 gameData.points -= cost;
                 gameData.clickPower++;
                 updateDisplay();
@@ -595,7 +606,7 @@
             // クリック強化ボタン
             const clickCost = gameData.clickPower * 100;
             document.getElementById('clickUpgradeCost').textContent = formatNumber(clickCost);
-            document.getElementById('clickUpgradeBtn').disabled = gameData.points < clickCost;
+            document.getElementById('clickUpgradeBtn').disabled = Math.floor(gameData.points) < clickCost;
         }
         
         function renderUpgrades() {
@@ -616,7 +627,7 @@
                     </div>
                     <div class="upgrade-count">${upgrade.count}</div>
                     <button class="buy-btn" onclick="buyUpgrade('${key}')" 
-                            ${gameData.points < upgrade.cost ? 'disabled' : ''}>
+                            ${Math.floor(gameData.points) < upgrade.cost ? 'disabled' : ''}>
                         ${formatNumber(upgrade.cost)}
                     </button>
                 `;
