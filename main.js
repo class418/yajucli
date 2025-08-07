@@ -14,7 +14,6 @@ const autoClickDisplay = document.getElementById('autoClickDisplay');
 const facilityButtons = document.getElementById('facilityButtons');
 const upgradeButtons = document.getElementById('upgradeButtons');
 const centerPanel = document.getElementById('centerPanel');
-const debugToggle = document.getElementById('debugToggle');
 
 let autoClickInterval = null;
 
@@ -60,41 +59,58 @@ nameInputWrapper.appendChild(nameLabel);
 nameInputWrapper.appendChild(nameInput);
 document.body.appendChild(nameInputWrapper);
 
-// デバッグモードGUI用要素
-const debugControlsWrapper = document.createElement('div');
-debugControlsWrapper.style.position = 'fixed';
-debugControlsWrapper.style.bottom = '10px';
-debugControlsWrapper.style.right = '10px';
-debugControlsWrapper.style.backgroundColor = '#222';
-debugControlsWrapper.style.padding = '10px';
-debugControlsWrapper.style.borderRadius = '8px';
-debugControlsWrapper.style.color = '#fff';
-debugControlsWrapper.style.fontSize = '14px';
-debugControlsWrapper.style.userSelect = 'none';
-debugControlsWrapper.style.display = 'none'; // 最初は非表示
+// デバッグモードGUI（名前が「デバッグ」の時のみ表示）
+const debugPanel = document.createElement('div');
+debugPanel.style.position = 'fixed';
+debugPanel.style.top = '50px';
+debugPanel.style.right = '10px';
+debugPanel.style.backgroundColor = '#222';
+debugPanel.style.padding = '10px';
+debugPanel.style.borderRadius = '8px';
+debugPanel.style.color = '#fff';
+debugPanel.style.fontSize = '14px';
+debugPanel.style.userSelect = 'none';
+debugPanel.style.display = 'none'; // 最初は非表示
+document.body.appendChild(debugPanel);
 
-// 強制フィーバーボタン出現ボタン
-const forceFeverBtn = document.createElement('button');
-forceFeverBtn.textContent = 'フィーバーボタン強制出現';
-forceFeverBtn.style.marginRight = '10px';
+// デバッグモードON/OFFチェックボックス
+const debugToggleLabel = document.createElement('label');
+debugToggleLabel.style.userSelect = 'none';
+debugToggleLabel.style.cursor = 'pointer';
+debugToggleLabel.style.display = 'flex';
+debugToggleLabel.style.alignItems = 'center';
+debugToggleLabel.style.marginBottom = '10px';
 
-// ポイント編集テキストボックス
-const pointsLabel = document.createElement('label');
-pointsLabel.textContent = 'ポイント編集: ';
-pointsLabel.style.marginRight = '6px';
+const debugToggleCheckbox = document.createElement('input');
+debugToggleCheckbox.type = 'checkbox';
+debugToggleCheckbox.style.marginRight = '6px';
 
-const pointsInput = document.createElement('input');
-pointsInput.type = 'number';
-pointsInput.min = '0';
-pointsInput.step = '1';
-pointsInput.style.width = '80px';
+debugToggleLabel.appendChild(debugToggleCheckbox);
+debugToggleLabel.appendChild(document.createTextNode('デバッグモード ON/OFF'));
 
-debugControlsWrapper.appendChild(forceFeverBtn);
-debugControlsWrapper.appendChild(pointsLabel);
-debugControlsWrapper.appendChild(pointsInput);
-document.body.appendChild(debugControlsWrapper);
+debugPanel.appendChild(debugToggleLabel);
 
-// 先輩名前管理変数
+// データ削除ボタン（常に表示）
+const deleteBtnWrapper = document.createElement('div');
+deleteBtnWrapper.style.position = 'fixed';
+deleteBtnWrapper.style.bottom = '10px';
+deleteBtnWrapper.style.right = '10px';
+
+const deleteBtn = document.createElement('button');
+deleteBtn.textContent = 'セーブデータ削除';
+deleteBtn.style.backgroundColor = '#b00';
+deleteBtn.style.color = '#fff';
+deleteBtn.style.border = 'none';
+deleteBtn.style.padding = '8px 12px';
+deleteBtn.style.borderRadius = '6px';
+deleteBtn.style.cursor = 'pointer';
+deleteBtn.style.fontWeight = 'bold';
+deleteBtn.style.userSelect = 'none';
+
+deleteBtnWrapper.appendChild(deleteBtn);
+document.body.appendChild(deleteBtnWrapper);
+
+// 名前変数
 let senpaiName = '野獣';
 
 // Audio初期化
@@ -125,19 +141,17 @@ function calcPrice(base, level) {
   return Math.floor(base * Math.pow(1.15, level));
 }
 
-// クリック時のポイント倍率にデバッグ効果を加算
 function pointsPerClick() {
   let base = 1 * (1 + 0.2 * clickPowerLevel);
-  if (debugMode) base *= 10; // デバッグは10倍に増加
-  if (feverActive) base *= 3; // フィーバー中は3倍
+  if (debugMode) base *= 10;
+  if (feverActive) base *= 3;
   return base;
 }
 
-// 自動クリック秒間ポイント倍率（施設＋デバッグ効果）
 function autoClickPerSec() {
   let base = autoClickLevel * 0.1 + takuyaLevel * 1.0;
-  if (debugMode) base *= 10; // デバッグ時は10倍
-  if (feverActive) base *= 3; // フィーバー中は3倍
+  if (debugMode) base *= 10;
+  if (feverActive) base *= 3;
   return base;
 }
 
@@ -150,13 +164,8 @@ function updateScore() {
   updateButtons();
 }
 
-// 施設アイコンは最大2列まで表示、3列目は描画しない（JavaScriptで制御）
 function addFacilityImages(src, count) {
-  centerPanel.innerHTML = '';
-  const maxPerRow = 10;
-  const maxRows = 2;
-  const showCount = Math.min(count, maxPerRow * maxRows);
-  for(let i = 0; i < showCount; i++) {
+  for(let i = 0; i < count; i++) {
     const img = document.createElement('img');
     img.src = src;
     img.classList.add('facilityIcon');
@@ -175,7 +184,6 @@ function startAutoClick() {
   autoClickInterval = setInterval(() => {
     points += autoClickPerSec();
     updateScore();
-    // 自動クリックでは音は鳴らさない仕様
   }, 1000);
 }
 
@@ -268,7 +276,7 @@ function updateButtons() {
 
 // フィーバーモード制御
 function startFever() {
-  if (feverActive) return; // 多重防止
+  if (feverActive) return;
   feverActive = true;
   feverReady = false;
   feverBtn.style.display = 'none';
@@ -283,7 +291,7 @@ function startFever() {
 function endFever() {
   feverActive = false;
   clickerBtn.src = '/yajucli/assets/yajuu.png';
-  clickerBtn.style.animationDuration = '5s'; // 元に戻す
+  clickerBtn.style.animationDuration = '5s';
   feverAudio.pause();
   feverAudio.currentTime = 0;
   if (!debugMode) setupFeverBtnAppearance();
@@ -297,14 +305,15 @@ function setupFeverBtnAppearance() {
   }
   feverReady = false;
   feverBtn.style.display = 'none';
+
   if (feverBtnInterval) clearInterval(feverBtnInterval);
+
   feverBtnInterval = setInterval(() => {
     if (feverActive) {
       feverBtn.style.display = 'none';
       return;
     }
-    const chance = Math.random();
-    if (chance < 0.3) {
+    if (Math.random() < 0.3) {
       feverReady = true;
       const rect = centerPanel.getBoundingClientRect();
       const x = rect.left + Math.random() * (rect.width - 100);
@@ -312,6 +321,7 @@ function setupFeverBtnAppearance() {
       feverBtn.style.left = `${x}px`;
       feverBtn.style.top = `${y}px`;
       feverBtn.style.display = 'block';
+
       setTimeout(() => {
         if (!feverActive) {
           feverBtn.style.display = 'none';
@@ -361,20 +371,24 @@ function onNameInputChange() {
   } else {
     senpaiName = val;
   }
+
+  // 名前が「デバッグ」ならデバッグモードGUI表示、それ以外は非表示
   if (senpaiName === 'デバッグ') {
-    debugMode = true;
-    debugToggle.checked = true;
+    debugPanel.style.display = 'block';
+    debugToggleCheckbox.checked = debugMode;
   } else {
+    debugPanel.style.display = 'none';
     debugMode = false;
-    debugToggle.checked = false;
+    debugToggleCheckbox.checked = false;
   }
+
+  // フィーバーボタン表示制御
   if (debugMode) {
     feverBtn.style.display = 'block';
-    debugControlsWrapper.style.display = 'block';
   } else {
     feverBtn.style.display = feverReady && !feverActive ? 'block' : 'none';
-    debugControlsWrapper.style.display = 'none';
   }
+
   updateScore();
   updateAutoClickDisplay();
   saveGame();
@@ -385,39 +399,22 @@ nameInput.addEventListener('keydown', (e) => {
   if (e.key === 'Enter') nameInput.blur();
 });
 
-// デバッグモードGUIトグル
-debugToggle.addEventListener('change', () => {
-  debugMode = debugToggle.checked;
+// デバッグモードトグル操作
+debugToggleCheckbox.addEventListener('change', () => {
+  debugMode = debugToggleCheckbox.checked;
   if (debugMode) {
     senpaiName = 'デバッグ';
     nameInput.value = senpaiName;
     feverBtn.style.display = 'block';
-    debugControlsWrapper.style.display = 'block';
   } else {
     if (senpaiName === 'デバッグ') {
       senpaiName = '野獣';
       nameInput.value = senpaiName;
     }
     feverBtn.style.display = feverReady && !feverActive ? 'block' : 'none';
-    debugControlsWrapper.style.display = 'none';
   }
   updateScore();
   updateAutoClickDisplay();
-  saveGame();
-});
-
-// デバッグGUIのボタンとテキストボックス操作
-forceFeverBtn.addEventListener('click', () => {
-  feverReady = true;
-  feverBtn.style.display = 'block';
-});
-
-pointsInput.value = points.toFixed(0);
-pointsInput.addEventListener('change', () => {
-  let val = parseFloat(pointsInput.value);
-  if (isNaN(val) || val < 0) val = 0;
-  points = val;
-  updateScore();
   saveGame();
 });
 
@@ -452,13 +449,21 @@ function loadGame() {
   }
 }
 
+// セーブデータ削除ボタンの挙動（二重確認）
+deleteBtn.addEventListener('click', () => {
+  if (!confirm('本当にセーブデータを削除しますか？')) return;
+  if (!confirm('二重確認です。本当に削除しますか？')) return;
+  localStorage.removeItem('yajuuSave');
+  alert('セーブデータを削除しました。ページを再読み込みします。');
+  location.reload();
+});
+
 // 初期化関数
 function init() {
   initAudioContext();
   loadClickSound();
   loadGame();
 
-  debugToggle.checked = debugMode;
   nameInput.value = senpaiName;
 
   createButtons();
@@ -478,8 +483,8 @@ function init() {
     setupFeverBtnAppearance();
   }
 
-  // デバッグGUI表示制御
-  debugControlsWrapper.style.display = debugMode ? 'block' : 'none';
+  // 名前入力欄の変更反映を強制実行（名前によるUI切替）
+  onNameInputChange();
 }
 
 window.addEventListener('load', init);
