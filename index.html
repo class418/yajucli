@@ -123,7 +123,6 @@
         
         .yajuu-image:active {
             filter: brightness(1.2);
-            animation-play-state: paused;
         }
         
         .click-effect {
@@ -574,7 +573,7 @@
         
         function buyUpgrade(upgradeKey) {
             const upgrade = gameData.upgrades[upgradeKey];
-            if (Math.floor(gameData.points) >= upgrade.cost) {
+            if (gameData.points >= upgrade.cost) {
                 gameData.points -= upgrade.cost;
                 upgrade.count++;
                 upgrade.cost = Math.floor(upgrade.cost * 1.15);
@@ -584,13 +583,12 @@
                     .reduce((total, up) => total + (up.count * up.pps), 0);
                 
                 updateDisplay();
-                renderUpgrades();
             }
         }
         
         function buyClickUpgrade() {
             const cost = gameData.clickPower * 100;
-            if (Math.floor(gameData.points) >= cost) {
+            if (gameData.points >= cost) {
                 gameData.points -= cost;
                 gameData.clickPower++;
                 updateDisplay();
@@ -606,7 +604,10 @@
             // クリック強化ボタン
             const clickCost = gameData.clickPower * 100;
             document.getElementById('clickUpgradeCost').textContent = formatNumber(clickCost);
-            document.getElementById('clickUpgradeBtn').disabled = Math.floor(gameData.points) < clickCost;
+            document.getElementById('clickUpgradeBtn').disabled = gameData.points < clickCost;
+            
+            // アップグレードボタンの状態も更新
+            renderUpgrades();
         }
         
         function renderUpgrades() {
@@ -627,7 +628,7 @@
                     </div>
                     <div class="upgrade-count">${upgrade.count}</div>
                     <button class="buy-btn" onclick="buyUpgrade('${key}')" 
-                            ${Math.floor(gameData.points) < upgrade.cost ? 'disabled' : ''}>
+                            ${gameData.points < upgrade.cost ? 'disabled' : ''}>
                         ${formatNumber(upgrade.cost)}
                     </button>
                 `;
