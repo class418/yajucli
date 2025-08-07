@@ -35,6 +35,7 @@
     flex-wrap: wrap;
     gap: 2px;
     align-content: flex-start;
+    position: relative;
   }
   #rightPanel {
     flex: 1;
@@ -55,7 +56,23 @@
     -webkit-user-drag: none;
     margin-bottom: 10px;
   }
+  #feverBtn {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 80px;
+    height: 80px;
+    cursor: pointer;
+    user-select: none;
+    transform: translate(-50%, -50%);
+    display: none;
+    z-index: 10;
+  }
   @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  @keyframes spinFast {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
   }
@@ -106,6 +123,10 @@
   .buyButton:hover:not(.disabled) {
     background: #666;
   }
+  body.fever {
+    background: linear-gradient(45deg, #ffcc00, #ff0099);
+    transition: background 0.5s;
+  }
 </style>
 </head>
 <body>
@@ -114,10 +135,11 @@
   <div id="autoClickDisplay">自動0.0/秒</div>
   <img id="clickerBtn" src="/yajucli/assets/yajuu.png" alt="野獣先輩" draggable="false" />
   <div id="scoreDisplay">ポイント: 0</div>
+  <input id="nameInput" type="text" placeholder="先輩の名前を入力（例：野獣）" style="margin-top:10px; width:160px; padding:4px; border-radius:6px; border:none; font-size:16px;"/>
 </div>
 
 <div id="centerPanel">
-  <!-- 購入した施設アイコンがここに横に並びます -->
+  <img id="feverBtn" src="/yajucli/assets/feverbtn.png" alt="フィーバーボタン" draggable="false" />
 </div>
 
 <div id="rightPanel">
@@ -131,11 +153,20 @@
   </div>
 </div>
 
+<audio id="feverAudio" src="/yajucli/assets/fever.mp3" loop></audio>
+
 <script>
 let points = 0;
 let clickPowerLevel = 0;
 let autoClickLevel = 0;
 let takuyaLevel = 0;
+
+let feverActive = false;
+let feverReady = true;
+const feverDuration = 30000; // 30秒
+const feverCooldown = 45000; // 45秒クールタイム
+
+let debugMode = false;
 
 const clickerBtn = document.getElementById('clickerBtn');
 const scoreDisplay = document.getElementById('scoreDisplay');
@@ -143,55 +174,44 @@ const autoClickDisplay = document.getElementById('autoClickDisplay');
 const facilityButtons = document.getElementById('facilityButtons');
 const upgradeButtons = document.getElementById('upgradeButtons');
 const centerPanel = document.getElementById('centerPanel');
+const feverBtn = document.getElementById('feverBtn');
+const feverAudio = document.getElementById('feverAudio');
+const nameInput = document.getElementById('nameInput');
 
 let autoClickInterval = null;
-const AudioContext = window.AudioContext || window.webkitAudioContext;
-let audioCtx = null;
-let clickBuffer = null;
-
-function initAudioContext() {
-  if (!audioCtx) audioCtx = new AudioContext();
-}
-function loadClickSound() {
-  fetch('/yajucli/assets/click.mp3')
-    .then(r => r.arrayBuffer())
-    .then(buf => audioCtx.decodeAudioData(buf))
-    .then(decoded => clickBuffer = decoded);
-}
-function playClickSound() {
-  if (!clickBuffer || !audioCtx) return;
-  const src = audioCtx.createBufferSource();
-  src.buffer = clickBuffer;
-  src.connect(audioCtx.destination);
-  src.start();
-}
 
 function calcPrice(base, level) {
   return Math.floor(base * Math.pow(1.15, level));
 }
+
 function pointsPerClick() {
-  return 1 * (1 + 0.2 * clickPowerLevel);
+  let base = 1 * (1 + 0.2 * clickPowerLevel);
+  if (debugMode) base *= 10;
+  if (feverActive) base *= 5;
+  return base;
 }
+
 function autoClickPerSec() {
-  return autoClickLevel * 0.1 + takuyaLevel * 1.0;
+  let base = autoClickLevel * 0.1 + takuyaLevel * 1.0;
+  if (debugMode) base *= 10;
+  if (feverActive) base *= 5;
+  return base;
 }
+
 function updateAutoClickDisplay() {
   autoClickDisplay.textContent = `自動${autoClickPerSec().toFixed(1)}/秒`;
 }
+
 function updateScore() {
   scoreDisplay.textContent = `ポイント: ${points.toFixed(1)}`;
   updateButtons();
+  saveGame();
 }
 
-// 施設アイコンは最大2列まで表示、3列目は描画しない（JavaScriptで制御）
 function addFacilityImages(src, count) {
-  centerPanel.innerHTML = '';
-
-  const maxPerRow = 10; 
+  const maxPerRow = 10;
   const maxRows = 2;
-
   const showCount = Math.min(count, maxPerRow * maxRows);
-
   for(let i = 0; i < showCount; i++) {
     const img = document.createElement('img');
     img.src = src;
@@ -200,12 +220,22 @@ function addFacilityImages(src, count) {
   }
 }
 
+function addAllFacilities() {
+  centerPanel.innerHTML = '';
+  addFacilityImages('/yajucli/assets/cursor.png', autoClickLevel);
+  addFacilityImages('/yajucli/assets/takuya.png', takuyaLevel);
+  if (feverReady && !feverActive) {
+    feverBtn.style.display = 'block';
+  } else {
+    feverBtn.style.display = 'none';
+  }
+}
+
 function startAutoClick() {
   if (autoClickInterval) return;
   autoClickInterval = setInterval(() => {
     points += autoClickPerSec();
     updateScore();
-    playClickSound();
   }, 1000);
 }
 
@@ -229,6 +259,7 @@ const facilities = [
     }
   }
 ];
+
 const upgrades = [
   { id:'clickPower', name:'クリック力強化', baseCost:50, level:0,
     onBuy:function(){
@@ -237,12 +268,6 @@ const upgrades = [
     }
   }
 ];
-
-function addAllFacilities() {
-  centerPanel.innerHTML = '';
-  addFacilityImages('/yajucli/assets/cursor.png', autoClickLevel);
-  addFacilityImages('/yajucli/assets/takuya.png', takuyaLevel);
-}
 
 function createButtons() {
   facilities.forEach(f => {
@@ -272,7 +297,6 @@ function updateButtons() {
           points -= price;
           f.onBuy();
           updateScore();
-          saveGame();
         }
       };
     } else {
@@ -291,7 +315,6 @@ function updateButtons() {
           points -= price;
           u.onBuy();
           updateScore();
-          saveGame();
         }
       };
     } else {
@@ -303,88 +326,156 @@ function updateButtons() {
 
 function playPuniAnimation() {
   clickerBtn.style.transform = 'scale(1.1,0.9)';
-  setTimeout(()=>clickerBtn.style.transform = 'scale(1,1)',100);
+  setTimeout(() => clickerBtn.style.transform = 'scale(1,1)', 100);
 }
 
 function handleTap(e) {
   e.preventDefault();
-  initAudioContext();
-  if (audioCtx.state === 'suspended') audioCtx.resume();
   points += pointsPerClick();
   updateScore();
-  playClickSound();
   playPuniAnimation();
-  saveGame();
 }
 
 clickerBtn.addEventListener('pointerdown', handleTap, { passive: false });
 
 document.addEventListener('contextmenu', e => e.preventDefault());
 
-// --------- データセーブ・ロード ---------
+function activateFever() {
+  if (!feverReady || feverActive) return;
 
-function getSaveData() {
-  return {
+  feverActive = true;
+  feverReady = false;
+
+  document.body.classList.add('fever');
+  clickerBtn.src = '/yajucli/assets/yajuu_fever.png';
+  clickerBtn.style.animation = "spinFast 0.2s linear infinite";
+
+  feverAudio.currentTime = 0;
+  feverAudio.play();
+
+  feverBtn.style.display = 'none';
+
+  setTimeout(() => {
+    feverActive = false;
+    document.body.classList.remove('fever');
+    clickerBtn.src = '/yajucli/assets/yajuu.png';
+    clickerBtn.style.animation = "spin 5s linear infinite";
+
+    feverAudio.pause();
+    feverAudio.currentTime = 0;
+
+    setTimeout(() => {
+      feverReady = true;
+      if (!debugMode) feverBtn.style.display = 'none';
+      else feverBtn.style.display = 'block';
+      saveGame();
+    }, feverCooldown);
+    saveGame();
+  }, feverDuration);
+  saveGame();
+}
+
+feverBtn.addEventListener('click', () => {
+  activateFever();
+});
+
+function randomFeverBtnShow() {
+  if (feverActive) {
+    feverBtn.style.display = 'none';
+    return;
+  }
+  if (debugMode) {
+    feverBtn.style.display = 'block';
+    return;
+  }
+  if (!feverReady) {
+    feverBtn.style.display = 'none';
+    return;
+  }
+  if (Math.random() < 0.05) {
+    feverBtn.style.display = 'block';
+  } else {
+    feverBtn.style.display = 'none';
+  }
+}
+
+// 名前変更とデバッグモード判定
+function onNameChange() {
+  let name = nameInput.value.trim() || "野獣";
+  nameInput.value = name; // 空白消すため
+  document.title = `${name}先輩クリックゲーム`;
+  clickerBtn.alt = `${name}先輩`;
+
+  debugMode = (name === "デバッグ先輩");
+  if (debugMode) {
+    feverBtn.style.display = 'block';
+  } else {
+    feverBtn.style.display = feverReady && !feverActive ? 'block' : 'none';
+  }
+  updateScore();
+  updateAutoClickDisplay();
+  saveGame();
+}
+
+nameInput.addEventListener('input', onNameChange);
+
+// セーブ・ロード処理
+function saveGame() {
+  const saveData = {
     points,
     clickPowerLevel,
     autoClickLevel,
     takuyaLevel,
-    facilities: facilities.map(f => f.level),
-    upgrades: upgrades.map(u => u.level),
+    name: nameInput.value.trim() || "野獣",
+    feverReady,
+    feverActive,
   };
-}
-
-function saveGame() {
-  try {
-    const data = getSaveData();
-    localStorage.setItem('yajuClickerSave', JSON.stringify(data));
-  } catch (e) {
-    console.error('セーブ失敗:', e);
-  }
+  localStorage.setItem('yajuClickerSave', JSON.stringify(saveData));
 }
 
 function loadGame() {
   const saved = localStorage.getItem('yajuClickerSave');
   if (!saved) return;
-
   try {
     const data = JSON.parse(saved);
-
     points = data.points || 0;
     clickPowerLevel = data.clickPowerLevel || 0;
     autoClickLevel = data.autoClickLevel || 0;
     takuyaLevel = data.takuyaLevel || 0;
+    feverReady = (typeof data.feverReady === 'boolean') ? data.feverReady : true;
+    feverActive = (typeof data.feverActive === 'boolean') ? data.feverActive : false;
 
-    if (data.facilities && Array.isArray(data.facilities)) {
-      facilities.forEach((f, i) => {
-        f.level = data.facilities[i] || 0;
-      });
-      autoClickLevel = facilities.find(f => f.id === 'cursor')?.level || 0;
-      takuyaLevel = facilities.find(f => f.id === 'takuya')?.level || 0;
+    // 先輩名
+    if (data.name) {
+      nameInput.value = data.name;
+      onNameChange();
     }
 
-    if (data.upgrades && Array.isArray(data.upgrades)) {
-      upgrades.forEach((u, i) => {
-        u.level = data.upgrades[i] || 0;
-      });
-      clickPowerLevel = upgrades.find(u => u.id === 'clickPower')?.level || 0;
+    updateScore();
+    updateAutoClickDisplay();
+    addAllFacilities();
+
+    // フィーバー中だったら復帰させる（少し不完全かも）
+    if (feverActive) {
+      activateFever();
     }
-  } catch (e) {
-    console.error('ロード失敗:', e);
+  } catch(e) {
+    console.error('セーブデータ読み込み失敗', e);
   }
 }
 
+// フィーバーボタンの表示管理タイマー
+setInterval(randomFeverBtnShow, 3000);
+
+// 初期化
 window.addEventListener('load', () => {
-  initAudioContext();
-  loadClickSound();
   loadGame();
-  updateAutoClickDisplay();
   createButtons();
-  addAllFacilities();
   updateScore();
+  updateAutoClickDisplay();
+  addAllFacilities();
   if (autoClickLevel + takuyaLevel > 0) startAutoClick();
 });
-
 </script>
 
 </body>
