@@ -3,178 +3,55 @@ body {
   padding: 0;
   background: #282c34;
   color: #fff;
-  font-family: Arial, sans-serif;
-  height: 100vh;
+  font-family: sans-serif;
   display: flex;
+  flex-direction: row;
+  height: 100vh;
   overflow: hidden;
 }
 
 #leftPanel, #centerPanel, #rightPanel {
   padding: 10px;
   box-sizing: border-box;
-  overflow-y: auto;
 }
 
 #leftPanel {
-  flex: 1;
-  background: #2a2f3a;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  gap: 10px;
+  width: 25%;
 }
 
 #centerPanel {
-  flex: 2;
-  background: #333;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2px;
-  align-content: flex-start;
+  width: 50%;
+  text-align: center;
 }
 
 #rightPanel {
-  flex: 1;
-  background: #222;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
+  width: 25%;
 }
 
 #clickerBtn {
-  width: 180px;
-  height: 180px;
-  border-radius: 15px;
-  object-fit: contain;
-  animation: spin 5s linear infinite;
+  width: 100%;
+  max-width: 300px;
   cursor: pointer;
-  user-select: none;
-  transition: transform 0.15s ease;
-  -webkit-user-drag: none;
-  margin-bottom: 10px;
+  transition: transform 0.1s;
 }
 
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+input[type="text"], input[type="number"] {
+  width: 100%;
+  margin-top: 10px;
+  padding: 5px;
+  font-size: 16px;
+  box-sizing: border-box;
 }
 
-#scoreDisplay {
-  font-size: 24px;
-  text-align: center;
-  user-select: none;
-  margin: 0;
-}
-
-#autoClickDisplay {
-  position: static;
-  top: 5px;
-  background: rgba(0,0,0,0.4);
-  padding: 2px 6px;
-  border-radius: 6px;
+button {
+  margin-top: 10px;
+  padding: 5px 10px;
   font-size: 14px;
-  font-weight: bold;
-  color: #ffeb3b;
-  text-shadow: 0 0 4px #000;
-  user-select: none;
-}
-
-.facilityIcon {
-  width: 48px;
-  height: 48px;
-  object-fit: contain;
-  -webkit-user-drag: none;
-  user-select: none;
-  margin: 0 1px 1px 0;
-  position: relative;
+  cursor: pointer;
 }
 
 .sectionTitle {
   font-weight: bold;
-  margin: 10px 0 5px;
-  border-bottom: 1px solid #555;
-}
-
-.buyButton {
-  background: #444;
-  border-radius: 8px;
-  padding: 8px;
-  margin-bottom: 8px;
-  cursor: pointer;
-  user-select: none;
-}
-
-.buyButton.disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.buyButton:hover:not(.disabled) {
-  background: #666;
-}
-
-#feverBtn {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 64px;
-  height: 64px;
-  margin-left: -32px;
-  margin-top: -32px;
-  cursor: pointer;
-  display: none;
-  user-select: none;
-  -webkit-user-drag: none;
-  z-index: 10;
-}
-
-input#nameInput {
-  margin-top: 10px;
-  padding: 6px 8px;
-  border-radius: 6px;
-  border: none;
-  font-size: 16px;
-  width: 160px;
-  text-align: center;
-}
-
-#debugTools {
-  margin-top: 10px;
-  display: none;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.debugField {
-  display: flex;
-  flex-direction: column;
-}
-
-.debugField label {
-  margin-bottom: 4px;
-  font-size: 14px;
-}
-
-.debugField input[type="number"] {
-  padding: 4px;
-  border-radius: 4px;
-  border: none;
-  font-size: 14px;
-}
-
-#resetDataBtn {
   margin-top: 20px;
-  background: #800;
-  padding: 10px;
-  border-radius: 8px;
-  text-align: center;
-  user-select: none;
-  cursor: pointer;
-  font-weight: bold;
-}
-
-#resetDataBtn:hover {
-  background: #a00;
+  margin-bottom: 5px;
 }
