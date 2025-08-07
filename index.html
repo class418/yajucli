@@ -1,351 +1,147 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8" />
-<title>野獣先輩クリックゲーム</title>
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-<style>
-  body {
-    background: #282c34;
-    color: #fff;
-    font-family: Arial, sans-serif;
-    margin: 0; padding: 0;
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: start;
-    overflow: auto;
-    min-height: 100vh;
-    padding: 20px 0;
-    box-sizing: border-box;
-  }
-  #appWrapper {
-    display: flex;
-    width: 400px;  /* 800 × 0.5 */
-    height: 250px; /* 500 × 0.5 */
-    transform: scale(0.5);
-    transform-origin: top left;
-    border: 1px solid #444;
-    background: #282c34;
-  }
-  #leftPanel, #centerPanel, #rightPanel {
-    padding: 10px;
-    box-sizing: border-box;
-    overflow-y: auto;
-  }
-  #leftPanel {
-    flex: 1;
-    background: #2a2f3a;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    padding-top: 20px;
-    position: relative;
-  }
-  #autoClickDisplay {
-    position: relative;
-    background: rgba(0,0,0,0.4);
-    padding: 2px 6px;
-    border-radius: 6px;
-    font-size: 14px;
-    font-weight: bold;
-    color: #ffeb3b;
-    text-shadow: 0 0 4px #000;
-    user-select: none;
-    margin-bottom: 4px;
-    text-align: center;
-    width: 180px;
-  }
-  #scoreDisplay {
-    font-size: 22px;
-    text-align: center;
-    user-select: none;
-    width: 180px;
-    margin-bottom: 10px;
-  }
-  #clickerBtn {
-    width: 180px;
-    height: 180px;
-    border-radius: 15px;
-    object-fit: contain;
-    animation: spin 5s linear infinite;
-    cursor: pointer;
-    user-select: none;
-    transition: transform 0.15s ease;
-    -webkit-user-drag: none;
-  }
-  @keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-  }
-  #centerPanel {
-    flex: 2;
-    background: #333;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 2px;
-    align-content: flex-start;
-  }
-  .facilityIcon {
-    width: 48px;
-    height: 48px;
-    object-fit: contain;
-    -webkit-user-drag: none;
-    user-select: none;
-    margin: 0 1px 1px 0;
-    position: relative;
-  }
-  #rightPanel {
-    flex: 1;
-    background: #222;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-  }
-  .sectionTitle {
-    font-weight: bold;
-    margin: 10px 0 5px;
-    border-bottom: 1px solid #555;
-  }
-  .buyButton {
-    background: #444;
-    border-radius: 8px;
-    padding: 8px;
-    margin-bottom: 8px;
-    cursor: pointer;
-    user-select: none;
-  }
-  .buyButton.disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-  .buyButton:hover:not(.disabled) {
-    background: #666;
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yaju Clicker</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      background: #111;
+      color: white;
+      font-family: sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #container {
+      width: 50vw;
+      height: 50vh;
+      display: flex;
+      flex-direction: row;
+    }
+
+    .column {
+      flex: 1;
+      padding: 4px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    #clickerBtn {
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    #clickerBtn img {
+      width: 100%;
+      max-width: 100px;
+    }
+
+    #cps {
+      font-size: 0.7em;
+      color: #ccc;
+      margin-bottom: 4px;
+    }
+
+    #score {
+      font-size: 1em;
+      margin-bottom: 8px;
+    }
+
+    #facilities {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      justify-content: center;
+      align-items: flex-start;
+      max-height: calc(100% - 60px);
+      overflow: hidden;
+    }
+
+    .facility {
+      background: #333;
+      padding: 3px 6px;
+      font-size: 0.6em;
+      border-radius: 2px;
+    }
+
+    .upgrade {
+      background: #444;
+      padding: 4px;
+      font-size: 0.6em;
+      border-radius: 2px;
+      margin-bottom: 4px;
+    }
+  </style>
 </head>
 <body>
-  <div id="appWrapper">
-    <div id="leftPanel">
-      <div id="autoClickDisplay">自動0.0/秒</div>
-      <div id="scoreDisplay">ポイント: 0</div>
-      <img id="clickerBtn" src="/yajucli/assets/yajuu.png" alt="野獣先輩" draggable="false" />
+  <div id="container">
+    <div class="column" id="left">
+      <button id="clickerBtn">
+        <img src="https://raw.githubusercontent.com/class418/yajucli/main/assets/yajuu.png" alt="野獣先輩">
+      </button>
     </div>
-    <div id="centerPanel">
-      <!-- 施設アイコン -->
+
+    <div class="column" id="center">
+      <div id="cps">毎秒: <span id="cpsValue">0</span></div>
+      <div id="score">ポイント: <span id="scoreValue">0</span></div>
+      <div id="facilities"></div>
     </div>
-    <div id="rightPanel">
-      <div>
-        <div class="sectionTitle">施設購入</div>
-        <div id="facilityButtons"></div>
-      </div>
-      <div>
-        <div class="sectionTitle">アップグレード</div>
-        <div id="upgradeButtons"></div>
-      </div>
+
+    <div class="column" id="right">
+      <div class="upgrade">Upgrade A</div>
+      <div class="upgrade">Upgrade B</div>
+      <div class="upgrade">Upgrade C</div>
     </div>
   </div>
 
-<script>
-let points = 0;
-let clickPowerLevel = 0;
-let autoClickLevel = 0;
-let takuyaLevel = 0;
+  <script>
+    let score = 0;
+    let cps = 0;
+    const scoreEl = document.getElementById("scoreValue");
+    const cpsEl = document.getElementById("cpsValue");
+    const facilities = document.getElementById("facilities");
 
-const clickerBtn = document.getElementById('clickerBtn');
-const scoreDisplay = document.getElementById('scoreDisplay');
-const autoClickDisplay = document.getElementById('autoClickDisplay');
-const facilityButtons = document.getElementById('facilityButtons');
-const upgradeButtons = document.getElementById('upgradeButtons');
-const centerPanel = document.getElementById('centerPanel');
-
-let autoClickInterval = null;
-const AudioContext = window.AudioContext || window.webkitAudioContext;
-let audioCtx = null;
-let clickBuffer = null;
-
-function initAudioContext() {
-  if (!audioCtx) audioCtx = new AudioContext();
-}
-function loadClickSound() {
-  fetch('/yajucli/assets/click.mp3')
-    .then(r => r.arrayBuffer())
-    .then(buf => audioCtx.decodeAudioData(buf))
-    .then(decoded => clickBuffer = decoded);
-}
-function playClickSound() {
-  if (!clickBuffer || !audioCtx) return;
-  const src = audioCtx.createBufferSource();
-  src.buffer = clickBuffer;
-  src.connect(audioCtx.destination);
-  src.start();
-}
-
-function calcPrice(base, level) {
-  return Math.floor(base * Math.pow(1.15, level));
-}
-function pointsPerClick() {
-  return 1 * (1 + 0.2 * clickPowerLevel);
-}
-function autoClickPerSec() {
-  return autoClickLevel * 0.1 + takuyaLevel * 1.0;
-}
-function formatPoints(num) {
-  if (num >= 1e9) return (num / 1e9).toFixed(2) + 'B';
-  if (num >= 1e6) return (num / 1e6).toFixed(2) + 'M';
-  if (num >= 1e3) return (num / 1e3).toFixed(2) + 'K';
-  return num.toFixed(1);
-}
-function updateAutoClickDisplay() {
-  autoClickDisplay.textContent = `自動${autoClickPerSec().toFixed(1)}/秒`;
-}
-function updateScore() {
-  scoreDisplay.textContent = `ポイント: ${formatPoints(points)}`;
-  updateButtons();
-}
-
-// 施設アイコンは最大2列まで表示、3列目は描画しない
-function addFacilityImages(src, count) {
-  const maxPerRow = 10;
-  const maxRows = 2;
-  const showCount = Math.min(count, maxPerRow * maxRows);
-
-  for(let i = 0; i < showCount; i++) {
-    const img = document.createElement('img');
-    img.src = src;
-    img.classList.add('facilityIcon');
-    centerPanel.appendChild(img);
-  }
-}
-
-function addAllFacilities() {
-  centerPanel.innerHTML = '';
-  addFacilityImages('/yajucli/assets/cursor.png', autoClickLevel);
-  addFacilityImages('/yajucli/assets/takuya.png', takuyaLevel);
-}
-
-function startAutoClick() {
-  if (autoClickInterval) return;
-  autoClickInterval = setInterval(() => {
-    points += autoClickPerSec();
-    updateScore();
-    playClickSound();
-  }, 1000);
-}
-
-const facilities = [
-  { id:'cursor', name:'自動クリック', baseCost:10, level:0, icon:'/yajucli/assets/cursor.png',
-    onBuy: function(){
-      this.level++;
-      autoClickLevel = this.level;
-      addAllFacilities();
-      updateAutoClickDisplay();
-      if (autoClickLevel + takuyaLevel > 0) startAutoClick();
+    function formatPoints(val) {
+      if (val >= 1_000_000_000) return (val / 1_000_000_000).toFixed(1) + "B";
+      if (val >= 1_000_000) return (val / 1_000_000).toFixed(1) + "M";
+      if (val >= 1_000) return (val / 1_000).toFixed(1) + "K";
+      return Math.floor(val);
     }
-  },
-  { id:'takuya', name:'拓也さん', baseCost:100, level:0, icon:'/yajucli/assets/takuya.png',
-    onBuy: function(){
-      this.level++;
-      takuyaLevel = this.level;
-      addAllFacilities();
-      updateAutoClickDisplay();
-      if (autoClickLevel + takuyaLevel > 0) startAutoClick();
+
+    function updateDisplay() {
+      scoreEl.textContent = formatPoints(score);
+      cpsEl.textContent = cps.toFixed(1);
     }
-  }
-];
-const upgrades = [
-  { id:'clickPower', name:'クリック力強化', baseCost:50, level:0,
-    onBuy:function(){
-      this.level++;
-      clickPowerLevel = this.level;
+
+    document.getElementById("clickerBtn").addEventListener("click", () => {
+      score += 1;
+      updateDisplay();
+    });
+
+    // 自動加算
+    setInterval(() => {
+      score += cps;
+      updateDisplay();
+    }, 1000);
+
+    // テスト用施設購入
+    for (let i = 0; i < 10; i++) {
+      const f = document.createElement("div");
+      f.className = "facility";
+      f.textContent = "施設" + (i + 1);
+      facilities.appendChild(f);
+      cps += 0.5;
     }
-  }
-];
-
-function createButtons() {
-  facilities.forEach(f => {
-    const btn = document.createElement('div');
-    btn.id = 'facility-'+f.id;
-    btn.classList.add('buyButton');
-    facilityButtons.appendChild(btn);
-  });
-  upgrades.forEach(u => {
-    const btn = document.createElement('div');
-    btn.id = 'upgrade-'+u.id;
-    btn.classList.add('buyButton');
-    upgradeButtons.appendChild(btn);
-  });
-  updateButtons();
-}
-
-function updateButtons() {
-  facilities.forEach(f => {
-    const btn = document.getElementById('facility-'+f.id);
-    const price = calcPrice(f.baseCost, f.level);
-    btn.textContent = `${f.name} Lv.${f.level} - ${price}pt`;
-    if (points >= price) {
-      btn.classList.remove('disabled');
-      btn.onclick = () => {
-        if (points >= price) {
-          points -= price;
-          f.onBuy();
-          updateScore();
-        }
-      };
-    } else {
-      btn.classList.add('disabled');
-      btn.onclick = null;
-    }
-  });
-  upgrades.forEach(u => {
-    const btn = document.getElementById('upgrade-'+u.id);
-    const price = calcPrice(u.baseCost, u.level);
-    btn.textContent = `${u.name} Lv.${u.level} - ${price}pt`;
-    if (points >= price) {
-      btn.classList.remove('disabled');
-      btn.onclick = () => {
-        if (points >= price) {
-          points -= price;
-          u.onBuy();
-          updateScore();
-        }
-      };
-    } else {
-      btn.classList.add('disabled');
-      btn.onclick = null;
-    }
-  });
-}
-
-function playPuniAnimation() {
-  clickerBtn.style.transform = 'scale(1.1,0.9)';
-  setTimeout(()=>clickerBtn.style.transform = 'scale(1,1)',100);
-}
-
-// 連打用イベント（押しっぱなしは加算しない）
-function handleTap(e) {
-  e.preventDefault(); // ダブルタップズーム防止
-  initAudioContext();
-  if (audioCtx.state === 'suspended') audioCtx.resume();
-  points += pointsPerClick();
-  updateScore();
-  playClickSound();
-  playPuniAnimation();
-}
-clickerBtn.addEventListener('pointerdown', handleTap, { passive: false });
-
-// 長押し保存防止
-document.addEventListener('contextmenu', e => e.preventDefault());
-
-window.addEventListener('load', () => {
-  initAudioContext();
-  loadClickSound();
-  updateAutoClickDisplay();
-  createButtons();
-  updateScore();
-});
-</script>
-
+    updateDisplay();
+  </script>
 </body>
 </html>
