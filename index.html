@@ -6,13 +6,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
 <style>
   body {
-    margin: 0;
-    padding: 0;
+    margin: 0; padding: 0;
     background: #282c34;
     color: #fff;
     font-family: Arial, sans-serif;
-    display: flex;
     height: 100vh;
+    display: flex;
     overflow: hidden;
   }
   #leftPanel, #centerPanel, #rightPanel {
@@ -21,23 +20,24 @@
     overflow-y: auto;
   }
   #leftPanel {
-    flex: 0 0 30%;
+    flex: 1;
+    background: #2a2f3a;
     display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: center;
+    justify-content: center;
     position: relative;
   }
   #centerPanel {
-    flex: 0 0 40%;
+    flex: 2;
     background: #333;
     display: flex;
     flex-wrap: wrap;
+    gap: 2px;
     align-content: flex-start;
-    gap: 5px;
   }
   #rightPanel {
-    flex: 0 0 30%;
+    flex: 1;
     background: #222;
     display: flex;
     flex-direction: column;
@@ -53,6 +53,7 @@
     user-select: none;
     transition: transform 0.15s ease;
     -webkit-user-drag: none;
+    margin-bottom: 10px;
   }
   @keyframes spin {
     from { transform: rotate(0deg); }
@@ -60,7 +61,7 @@
   }
   #scoreDisplay {
     font-size: 24px;
-    margin-top: 10px;
+    margin-top: 5px;
     text-align: center;
     user-select: none;
   }
@@ -77,11 +78,13 @@
     user-select: none;
   }
   .facilityIcon {
-    width: 64px;
-    height: 64px;
+    width: 48px;  /* 施設アイコンを少し小さく */
+    height: 48px;
     object-fit: contain;
     -webkit-user-drag: none;
     user-select: none;
+    margin: 0 1px 1px 0; /* 横にぎゅっと詰める */
+    position: relative;
   }
   .sectionTitle {
     font-weight: bold;
@@ -114,7 +117,7 @@
 </div>
 
 <div id="centerPanel">
-  <!-- 購入施設がここに並ぶ -->
+  <!-- 購入した施設アイコンがここに横に並びます -->
 </div>
 
 <div id="rightPanel">
@@ -179,12 +182,26 @@ function updateScore() {
   scoreDisplay.textContent = `ポイント: ${points.toFixed(1)}`;
   updateButtons();
 }
-function addFacilityImage(src) {
-  const img = document.createElement('img');
-  img.src = src;
-  img.classList.add('facilityIcon');
-  img.draggable = false;
-  centerPanel.appendChild(img);
+
+// 施設アイコンは最大2列まで表示、3列目は描画しない（JavaScriptで制御）
+function addFacilityImages(src, count) {
+  // 既存のアイコン全部消す
+  centerPanel.innerHTML = '';
+
+  const maxPerRow = 10; // 横最大10個（10×2 = 20個まで）
+  const maxRows = 2;
+
+  // 表示数は最大20個まで
+  const showCount = Math.min(count, maxPerRow * maxRows);
+
+  for(let i = 0; i < showCount; i++) {
+    const img = document.createElement('img');
+    img.src = src;
+    img.classList.add('facilityIcon');
+
+    // 横幅が10個で折り返しなので折り返しはCSSのflex-wrapで対応
+    centerPanel.appendChild(img);
+  }
 }
 
 function startAutoClick() {
@@ -201,18 +218,18 @@ const facilities = [
     onBuy: function(){
       this.level++;
       autoClickLevel = this.level;
-      addFacilityImage(this.icon);
+      addAllFacilities();
       updateAutoClickDisplay();
-      if (autoClickLevel > 0) startAutoClick();
+      if (autoClickLevel + takuyaLevel > 0) startAutoClick();
     }
   },
   { id:'takuya', name:'拓也さん', baseCost:100, level:0, icon:'/yajucli/assets/takuya.png',
     onBuy: function(){
       this.level++;
       takuyaLevel = this.level;
-      addFacilityImage(this.icon);
+      addAllFacilities();
       updateAutoClickDisplay();
-      if (takuyaLevel > 0) startAutoClick();
+      if (autoClickLevel + takuyaLevel > 0) startAutoClick();
     }
   }
 ];
@@ -224,6 +241,15 @@ const upgrades = [
     }
   }
 ];
+
+function addAllFacilities() {
+  // クリック施設と拓也施設をまとめて中央パネルに表示
+  centerPanel.innerHTML = '';
+  // まずカーソル施設
+  addFacilityImages('/yajucli/assets/cursor.png', autoClickLevel);
+  // つぎに拓也施設（まとめて追加）
+  addFacilityImages('/yajucli/assets/takuya.png', takuyaLevel);
+}
 
 function createButtons() {
   facilities.forEach(f => {
@@ -296,7 +322,6 @@ function handleTap(e) {
   playPuniAnimation();
 }
 
-// 高速連打対応（pointerdownだけ）
 clickerBtn.addEventListener('pointerdown', handleTap, { passive: false });
 
 // 長押し保存防止
