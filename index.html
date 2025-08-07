@@ -6,13 +6,24 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
 <style>
   body {
-    margin: 0; padding: 0;
     background: #282c34;
     color: #fff;
     font-family: Arial, sans-serif;
+    margin: 0; padding: 0;
     height: 100vh;
     display: flex;
-    overflow: hidden;
+    justify-content: center;
+    align-items: start;
+    overflow: auto;
+  }
+  #appWrapper {
+    display: flex;
+    width: 800px;
+    height: 500px;
+    transform: scale(0.5);
+    transform-origin: top left;
+    border: 1px solid #444;
+    background: #282c34;
   }
   #leftPanel, #centerPanel, #rightPanel {
     padding: 10px;
@@ -25,23 +36,30 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
+    padding-top: 20px;
     position: relative;
   }
-  #centerPanel {
-    flex: 2;
-    background: #333;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 2px;
-    align-content: flex-start;
+  #autoClickDisplay {
+    position: relative;
+    background: rgba(0,0,0,0.4);
+    padding: 2px 6px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: bold;
+    color: #ffeb3b;
+    text-shadow: 0 0 4px #000;
+    user-select: none;
+    margin-bottom: 4px;
+    text-align: center;
+    width: 180px;
   }
-  #rightPanel {
-    flex: 1;
-    background: #222;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
+  #scoreDisplay {
+    font-size: 22px;
+    text-align: center;
+    user-select: none;
+    width: 180px;
+    margin-bottom: 10px;
   }
   #clickerBtn {
     width: 180px;
@@ -53,38 +71,34 @@
     user-select: none;
     transition: transform 0.15s ease;
     -webkit-user-drag: none;
-    margin-bottom: 10px;
   }
   @keyframes spin {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
   }
-  #scoreDisplay {
-    font-size: 24px;
-    margin-top: 5px;
-    text-align: center;
-    user-select: none;
-  }
-  #autoClickDisplay {
-    position: absolute;
-    top: 5px;
-    background: rgba(0,0,0,0.4);
-    padding: 2px 6px;
-    border-radius: 6px;
-    font-size: 14px;
-    font-weight: bold;
-    color: #ffeb3b;
-    text-shadow: 0 0 4px #000;
-    user-select: none;
+  #centerPanel {
+    flex: 2;
+    background: #333;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    align-content: flex-start;
   }
   .facilityIcon {
-    width: 48px;  /* 施設アイコンを少し小さく */
+    width: 48px;
     height: 48px;
     object-fit: contain;
     -webkit-user-drag: none;
     user-select: none;
-    margin: 0 1px 1px 0; /* 横にぎゅっと詰める */
+    margin: 0 1px 1px 0;
     position: relative;
+  }
+  #rightPanel {
+    flex: 1;
+    background: #222;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
   }
   .sectionTitle {
     font-weight: bold;
@@ -109,27 +123,26 @@
 </style>
 </head>
 <body>
-
-<div id="leftPanel">
-  <div id="autoClickDisplay">自動0.0/秒</div>
-  <img id="clickerBtn" src="/yajucli/assets/yajuu.png" alt="野獣先輩" draggable="false" />
-  <div id="scoreDisplay">ポイント: 0</div>
-</div>
-
-<div id="centerPanel">
-  <!-- 購入した施設アイコンがここに横に並びます -->
-</div>
-
-<div id="rightPanel">
-  <div>
-    <div class="sectionTitle">施設購入</div>
-    <div id="facilityButtons"></div>
+  <div id="appWrapper">
+    <div id="leftPanel">
+      <div id="autoClickDisplay">自動0.0/秒</div>
+      <div id="scoreDisplay">ポイント: 0</div>
+      <img id="clickerBtn" src="/yajucli/assets/yajuu.png" alt="野獣先輩" draggable="false" />
+    </div>
+    <div id="centerPanel">
+      <!-- 施設アイコン -->
+    </div>
+    <div id="rightPanel">
+      <div>
+        <div class="sectionTitle">施設購入</div>
+        <div id="facilityButtons"></div>
+      </div>
+      <div>
+        <div class="sectionTitle">アップグレード</div>
+        <div id="upgradeButtons"></div>
+      </div>
+    </div>
   </div>
-  <div>
-    <div class="sectionTitle">アップグレード</div>
-    <div id="upgradeButtons"></div>
-  </div>
-</div>
 
 <script>
 let points = 0;
@@ -175,33 +188,38 @@ function pointsPerClick() {
 function autoClickPerSec() {
   return autoClickLevel * 0.1 + takuyaLevel * 1.0;
 }
+function formatPoints(num) {
+  if (num >= 1e9) return (num / 1e9).toFixed(2) + 'B';
+  if (num >= 1e6) return (num / 1e6).toFixed(2) + 'M';
+  if (num >= 1e3) return (num / 1e3).toFixed(2) + 'K';
+  return num.toFixed(1);
+}
 function updateAutoClickDisplay() {
   autoClickDisplay.textContent = `自動${autoClickPerSec().toFixed(1)}/秒`;
 }
 function updateScore() {
-  scoreDisplay.textContent = `ポイント: ${points.toFixed(1)}`;
+  scoreDisplay.textContent = `ポイント: ${formatPoints(points)}`;
   updateButtons();
 }
 
-// 施設アイコンは最大2列まで表示、3列目は描画しない（JavaScriptで制御）
+// 施設アイコンは最大2列まで表示、3列目は描画しない
 function addFacilityImages(src, count) {
-  // 既存のアイコン全部消す
-  centerPanel.innerHTML = '';
-
-  const maxPerRow = 10; // 横最大10個（10×2 = 20個まで）
+  const maxPerRow = 10;
   const maxRows = 2;
-
-  // 表示数は最大20個まで
   const showCount = Math.min(count, maxPerRow * maxRows);
 
   for(let i = 0; i < showCount; i++) {
     const img = document.createElement('img');
     img.src = src;
     img.classList.add('facilityIcon');
-
-    // 横幅が10個で折り返しなので折り返しはCSSのflex-wrapで対応
     centerPanel.appendChild(img);
   }
+}
+
+function addAllFacilities() {
+  centerPanel.innerHTML = '';
+  addFacilityImages('/yajucli/assets/cursor.png', autoClickLevel);
+  addFacilityImages('/yajucli/assets/takuya.png', takuyaLevel);
 }
 
 function startAutoClick() {
@@ -241,15 +259,6 @@ const upgrades = [
     }
   }
 ];
-
-function addAllFacilities() {
-  // クリック施設と拓也施設をまとめて中央パネルに表示
-  centerPanel.innerHTML = '';
-  // まずカーソル施設
-  addFacilityImages('/yajucli/assets/cursor.png', autoClickLevel);
-  // つぎに拓也施設（まとめて追加）
-  addFacilityImages('/yajucli/assets/takuya.png', takuyaLevel);
-}
 
 function createButtons() {
   facilities.forEach(f => {
@@ -311,7 +320,7 @@ function playPuniAnimation() {
   setTimeout(()=>clickerBtn.style.transform = 'scale(1,1)',100);
 }
 
-// 連打用イベント（押しっぱなしでは加算されない）
+// 連打用イベント（押しっぱなしは加算しない）
 function handleTap(e) {
   e.preventDefault(); // ダブルタップズーム防止
   initAudioContext();
@@ -321,7 +330,6 @@ function handleTap(e) {
   playClickSound();
   playPuniAnimation();
 }
-
 clickerBtn.addEventListener('pointerdown', handleTap, { passive: false });
 
 // 長押し保存防止
