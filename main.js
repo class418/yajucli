@@ -60,6 +60,40 @@ nameInputWrapper.appendChild(nameLabel);
 nameInputWrapper.appendChild(nameInput);
 document.body.appendChild(nameInputWrapper);
 
+// デバッグモードGUI用要素
+const debugControlsWrapper = document.createElement('div');
+debugControlsWrapper.style.position = 'fixed';
+debugControlsWrapper.style.bottom = '10px';
+debugControlsWrapper.style.right = '10px';
+debugControlsWrapper.style.backgroundColor = '#222';
+debugControlsWrapper.style.padding = '10px';
+debugControlsWrapper.style.borderRadius = '8px';
+debugControlsWrapper.style.color = '#fff';
+debugControlsWrapper.style.fontSize = '14px';
+debugControlsWrapper.style.userSelect = 'none';
+debugControlsWrapper.style.display = 'none'; // 最初は非表示
+
+// 強制フィーバーボタン出現ボタン
+const forceFeverBtn = document.createElement('button');
+forceFeverBtn.textContent = 'フィーバーボタン強制出現';
+forceFeverBtn.style.marginRight = '10px';
+
+// ポイント編集テキストボックス
+const pointsLabel = document.createElement('label');
+pointsLabel.textContent = 'ポイント編集: ';
+pointsLabel.style.marginRight = '6px';
+
+const pointsInput = document.createElement('input');
+pointsInput.type = 'number';
+pointsInput.min = '0';
+pointsInput.step = '1';
+pointsInput.style.width = '80px';
+
+debugControlsWrapper.appendChild(forceFeverBtn);
+debugControlsWrapper.appendChild(pointsLabel);
+debugControlsWrapper.appendChild(pointsInput);
+document.body.appendChild(debugControlsWrapper);
+
 // 先輩名前管理変数
 let senpaiName = '野獣';
 
@@ -141,7 +175,7 @@ function startAutoClick() {
   autoClickInterval = setInterval(() => {
     points += autoClickPerSec();
     updateScore();
-    // 自動クリックでは音は鳴らさない仕様（任意）
+    // 自動クリックでは音は鳴らさない仕様
   }, 1000);
 }
 
@@ -241,7 +275,6 @@ function startFever() {
   clickerBtn.src = '/yajucli/assets/yajuu_fever.png';
   clickerBtn.style.animationDuration = '0.2s'; // 爆速回転
   feverAudio.play().catch(() => {});
-  // フィーバー終了30秒後
   feverTimeout = setTimeout(() => {
     endFever();
   }, 30000);
@@ -253,7 +286,6 @@ function endFever() {
   clickerBtn.style.animationDuration = '5s'; // 元に戻す
   feverAudio.pause();
   feverAudio.currentTime = 0;
-  // フィーバー再準備
   if (!debugMode) setupFeverBtnAppearance();
   updateScore();
 }
@@ -265,28 +297,21 @@ function setupFeverBtnAppearance() {
   }
   feverReady = false;
   feverBtn.style.display = 'none';
-
   if (feverBtnInterval) clearInterval(feverBtnInterval);
-
-  // 15〜30秒毎にfeverBtnを一瞬表示するタイマー（ランダム位置）
   feverBtnInterval = setInterval(() => {
     if (feverActive) {
       feverBtn.style.display = 'none';
       return;
     }
     const chance = Math.random();
-    if (chance < 0.3) { // 約30%で出現
+    if (chance < 0.3) {
       feverReady = true;
-      // 真ん中パネル（centerPanel）の範囲内に配置
       const rect = centerPanel.getBoundingClientRect();
-      // パネル内ランダム位置(100px分余裕)
       const x = rect.left + Math.random() * (rect.width - 100);
       const y = rect.top + Math.random() * (rect.height - 100);
       feverBtn.style.left = `${x}px`;
       feverBtn.style.top = `${y}px`;
       feverBtn.style.display = 'block';
-
-      // 5秒で消す
       setTimeout(() => {
         if (!feverActive) {
           feverBtn.style.display = 'none';
@@ -336,7 +361,6 @@ function onNameInputChange() {
   } else {
     senpaiName = val;
   }
-  // デバッグモード判定
   if (senpaiName === 'デバッグ') {
     debugMode = true;
     debugToggle.checked = true;
@@ -344,14 +368,13 @@ function onNameInputChange() {
     debugMode = false;
     debugToggle.checked = false;
   }
-
-  // フィーバーボタン表示制御
   if (debugMode) {
     feverBtn.style.display = 'block';
+    debugControlsWrapper.style.display = 'block';
   } else {
     feverBtn.style.display = feverReady && !feverActive ? 'block' : 'none';
+    debugControlsWrapper.style.display = 'none';
   }
-
   updateScore();
   updateAutoClickDisplay();
   saveGame();
@@ -369,15 +392,32 @@ debugToggle.addEventListener('change', () => {
     senpaiName = 'デバッグ';
     nameInput.value = senpaiName;
     feverBtn.style.display = 'block';
+    debugControlsWrapper.style.display = 'block';
   } else {
     if (senpaiName === 'デバッグ') {
       senpaiName = '野獣';
       nameInput.value = senpaiName;
     }
     feverBtn.style.display = feverReady && !feverActive ? 'block' : 'none';
+    debugControlsWrapper.style.display = 'none';
   }
   updateScore();
   updateAutoClickDisplay();
+  saveGame();
+});
+
+// デバッグGUIのボタンとテキストボックス操作
+forceFeverBtn.addEventListener('click', () => {
+  feverReady = true;
+  feverBtn.style.display = 'block';
+});
+
+pointsInput.value = points.toFixed(0);
+pointsInput.addEventListener('change', () => {
+  let val = parseFloat(pointsInput.value);
+  if (isNaN(val) || val < 0) val = 0;
+  points = val;
+  updateScore();
   saveGame();
 });
 
@@ -429,16 +469,17 @@ function init() {
   if (autoClickLevel + takuyaLevel > 0) startAutoClick();
 
   if (feverActive) {
-    // フィーバーモード継続中だったら復帰処理
     clickerBtn.src = '/yajucli/assets/yajuu_fever.png';
     clickerBtn.style.animationDuration = '0.2s';
     feverAudio.play().catch(() => {});
-    // フィーバーはタイマーリセットはできないため、30秒経過扱いはしない仕様
   } else {
     clickerBtn.src = '/yajucli/assets/yajuu.png';
     clickerBtn.style.animationDuration = '5s';
     setupFeverBtnAppearance();
   }
+
+  // デバッグGUI表示制御
+  debugControlsWrapper.style.display = debugMode ? 'block' : 'none';
 }
 
 window.addEventListener('load', init);
