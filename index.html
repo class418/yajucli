@@ -1,56 +1,537 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <title>野獣先輩クリックゲーム</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>野獣先輩クリッカー</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+            user-select: none;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .title {
+            font-size: 3rem;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #ff6b6b, #feca57);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #feca57;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        .game-area {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 30px;
+            align-items: start;
+        }
+        
+        .click-area {
+            text-align: center;
+        }
+        
+        .yajuu-container {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+        
+        .yajuu-image {
+            width: 300px;
+            height: 300px;
+            cursor: pointer;
+            transition: transform 0.1s ease;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            object-fit: cover;
+        }
+        
+        .yajuu-image:hover {
+            transform: scale(1.05);
+        }
+        
+        .yajuu-image:active {
+            transform: scale(0.95);
+        }
+        
+        .click-effect {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            font-size: 2rem;
+            font-weight: bold;
+            color: #ff6b6b;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            animation: clickEffect 0.6s ease-out forwards;
+        }
+        
+        @keyframes clickEffect {
+            0% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -70%) scale(1.5);
+            }
+        }
+        
+        .fever-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            margin: 20px 0;
+            transition: transform 0.2s ease;
+            opacity: 0.7;
+        }
+        
+        .fever-btn:hover {
+            transform: scale(1.1);
+            opacity: 1;
+        }
+        
+        .fever-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        
+        .fever-btn img {
+            width: 120px;
+            height: auto;
+            border-radius: 10px;
+        }
+        
+        .fever-timer {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #ff6b6b;
+            margin-top: 10px;
+        }
+        
+        .upgrades {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .upgrades-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-align: center;
+            color: #feca57;
+        }
+        
+        .upgrade-item {
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: background 0.2s ease;
+        }
+        
+        .upgrade-item:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        
+        .upgrade-info {
+            display: flex;
+            align-items: center;
+            flex-grow: 1;
+        }
+        
+        .upgrade-icon {
+            font-size: 2rem;
+            margin-right: 15px;
+        }
+        
+        .upgrade-details {
+            flex-grow: 1;
+        }
+        
+        .upgrade-name {
+            font-weight: bold;
+            margin-bottom: 3px;
+        }
+        
+        .upgrade-description {
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+        
+        .upgrade-count {
+            background: rgba(255,255,255,0.2);
+            border-radius: 20px;
+            padding: 5px 12px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .buy-btn {
+            background: linear-gradient(45deg, #ff6b6b, #feca57);
+            border: none;
+            border-radius: 8px;
+            padding: 10px 15px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            min-width: 80px;
+        }
+        
+        .buy-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .buy-btn:disabled {
+            background: rgba(255,255,255,0.2);
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .fever-mode {
+            background: linear-gradient(135deg, #ff6b6b 0%, #feca57 100%);
+            animation: feverPulse 1s ease-in-out infinite alternate;
+        }
+        
+        @keyframes feverPulse {
+            0% { filter: brightness(1); }
+            100% { filter: brightness(1.2); }
+        }
+        
+        @media (max-width: 768px) {
+            .game-area {
+                grid-template-columns: 1fr;
+            }
+            
+            .yajuu-image {
+                width: 250px;
+                height: 250px;
+            }
+            
+            .title {
+                font-size: 2rem;
+            }
+        }
+    </style>
 </head>
 <body>
-
-<div id="leftPanel">
-  <div id="autoClickDisplay">自動0.0/秒</div>
-  <div id="scoreDisplay">ポイント: 0</div>
-  <img id="clickerBtn" src="/yajucli/assets/yajuu.png" alt="野獣先輩" draggable="false" />
-  <input id="nameInput" type="text" placeholder="先輩の名前を入力（例：野獣）" />
-</div>
-
-<div id="centerPanel">
-  <img id="feverButton" src="/yajucli/assets/feverbtn.png" style="display: none;" />
-</div>
-
-<div id="rightPanel">
-  <div>
-    <div class="sectionTitle">施設購入</div>
-    <div id="facilityButtons"></div>
-  </div>
-  <div>
-    <div class="sectionTitle">アップグレード</div>
-    <div id="upgradeButtons"></div>
-  </div>
-
-  <div style="margin-top: 20px;">
-    <div class="sectionTitle">デバッグモード</div>
-    <label style="user-select:none; cursor:pointer;">
-      <input type="checkbox" id="debugToggle" style="display:none;" />
-      <span id="debugLabel" style="display:none;">ON/OFF</span>
-    </label>
-
-    <div id="debugControls" style="display:none;">
-      <button id="forceFeverBtn">フィーバー強制出現</button>
-      <input id="pointOverrideInput" type="number" placeholder="ポイント上書き" />
-      <button id="setPointBtn">ポイント設定</button>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">野獣先輩クリッカー</h1>
+            <p>野獣先輩をクリックして淫夢ポイントを獲得しよう！</p>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-value" id="points">0</div>
+                <div class="stat-label">淫夢ポイント</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="pointsPerSecond">0</div>
+                <div class="stat-label">毎秒獲得</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="clickPower">1</div>
+                <div class="stat-label">クリック力</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalClicks">0</div>
+                <div class="stat-label">総クリック数</div>
+            </div>
+        </div>
+        
+        <div class="game-area">
+            <div class="click-area">
+                <div class="yajuu-container">
+                    <img src="assets/yajuu.png" alt="野獣先輩" class="yajuu-image" id="yajuuImage" onclick="clickYajuu()">
+                </div>
+                
+                <button class="fever-btn" id="feverBtn" onclick="activateFever()" disabled>
+                    <img src="assets/feverbtn.png" alt="フィーバー">
+                </button>
+                
+                <div class="fever-timer" id="feverTimer" style="display: none;"></div>
+                
+                <div style="margin-top: 20px;">
+                    <button class="buy-btn" onclick="buyClickUpgrade()" id="clickUpgradeBtn">
+                        クリック強化<br><span id="clickUpgradeCost">100</span>P
+                    </button>
+                </div>
+            </div>
+            
+            <div class="upgrades">
+                <h2 class="upgrades-title">🏠 アップグレード</h2>
+                <div id="upgradeList"></div>
+            </div>
+        </div>
     </div>
-  </div>
-
-  <div style="margin-top: 20px;">
-    <div class="sectionTitle">セーブデータ管理</div>
-    <button id="resetDataBtn">データを削除する</button>
-  </div>
-</div>
-
-<audio id="feverAudio" src="/yajucli/assets/fever.mp3" loop></audio>
-
-<script src="main.js"></script>
+    
+    <script>
+        let gameData = {
+            points: 0,
+            pointsPerSecond: 0,
+            clickPower: 1,
+            totalClicks: 0,
+            feverActive: false,
+            feverCooldown: false,
+            upgrades: {
+                takuya: { count: 0, cost: 15, pps: 1, name: 'TAKUYA', icon: '👨', description: '毎秒1P' },
+                homo: { count: 0, cost: 100, pps: 5, name: 'ホモ', icon: '🏳️‍🌈', description: '毎秒5P' },
+                senpai: { count: 0, cost: 1100, pps: 25, name: '先輩', icon: '👨‍💼', description: '毎秒25P' },
+                danshi: { count: 0, cost: 12000, pps: 100, name: '男子学生', icon: '👨‍🎓', description: '毎秒100P' },
+                yajuu: { count: 0, cost: 130000, pps: 500, name: '野獣先輩', icon: '🦁', description: '毎秒500P' },
+                inmu: { count: 0, cost: 1400000, pps: 2000, name: '淫夢の館', icon: '🏠', description: '毎秒2000P' }
+            }
+        };
+        
+        // 音声要素
+        let clickSound, feverSound;
+        
+        // ページ読み込み時の初期化
+        window.onload = function() {
+            try {
+                clickSound = new Audio('assets/click.mp3');
+                feverSound = new Audio('assets/fever.mp3');
+                clickSound.volume = 0.3;
+                feverSound.volume = 0.5;
+            } catch (e) {
+                console.log('音声ファイルの読み込みに失敗しました');
+            }
+            
+            updateDisplay();
+            renderUpgrades();
+            
+            // 自動獲得のタイマー
+            setInterval(() => {
+                if (gameData.pointsPerSecond > 0) {
+                    gameData.points += gameData.pointsPerSecond / 10;
+                    updateDisplay();
+                }
+            }, 100);
+            
+            // フィーバーボタンのクールダウンチェック
+            setInterval(() => {
+                if (!gameData.feverActive && !gameData.feverCooldown && gameData.points >= 1000) {
+                    document.getElementById('feverBtn').disabled = false;
+                }
+            }, 1000);
+        };
+        
+        function clickYajuu() {
+            let points = gameData.feverActive ? gameData.clickPower * 5 : gameData.clickPower;
+            gameData.points += points;
+            gameData.totalClicks++;
+            
+            // クリックエフェクト
+            showClickEffect(points);
+            
+            // 音声再生
+            if (clickSound) {
+                clickSound.currentTime = 0;
+                clickSound.play().catch(() => {});
+            }
+            
+            updateDisplay();
+        }
+        
+        function showClickEffect(points) {
+            const container = document.querySelector('.yajuu-container');
+            const effect = document.createElement('div');
+            effect.className = 'click-effect';
+            effect.textContent = '+' + formatNumber(points);
+            
+            // ランダムな位置に表示
+            const x = Math.random() * 100 - 50;
+            const y = Math.random() * 100 - 50;
+            effect.style.left = (50 + x * 0.3) + '%';
+            effect.style.top = (50 + y * 0.3) + '%';
+            
+            container.appendChild(effect);
+            
+            setTimeout(() => {
+                container.removeChild(effect);
+            }, 600);
+        }
+        
+        function activateFever() {
+            gameData.feverActive = true;
+            gameData.feverCooldown = true;
+            
+            // フィーバー画像に変更
+            document.getElementById('yajuuImage').src = 'assets/yajuu_fever.png';
+            document.getElementById('feverBtn').disabled = true;
+            document.body.classList.add('fever-mode');
+            
+            // フィーバー音声再生
+            if (feverSound) {
+                feverSound.play().catch(() => {});
+            }
+            
+            // タイマー表示
+            let timeLeft = 10;
+            const timerElement = document.getElementById('feverTimer');
+            timerElement.style.display = 'block';
+            timerElement.textContent = `フィーバータイム: ${timeLeft}s`;
+            
+            const timer = setInterval(() => {
+                timeLeft--;
+                timerElement.textContent = `フィーバータイム: ${timeLeft}s`;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    endFever();
+                }
+            }, 1000);
+        }
+        
+        function endFever() {
+            gameData.feverActive = false;
+            document.getElementById('yajuuImage').src = 'assets/yajuu.png';
+            document.body.classList.remove('fever-mode');
+            document.getElementById('feverTimer').style.display = 'none';
+            
+            // クールダウン開始（30秒）
+            let cooldownTime = 30;
+            const cooldownTimer = setInterval(() => {
+                cooldownTime--;
+                if (cooldownTime <= 0) {
+                    clearInterval(cooldownTimer);
+                    gameData.feverCooldown = false;
+                }
+            }, 1000);
+        }
+        
+        function buyUpgrade(upgradeKey) {
+            const upgrade = gameData.upgrades[upgradeKey];
+            if (gameData.points >= upgrade.cost) {
+                gameData.points -= upgrade.cost;
+                upgrade.count++;
+                upgrade.cost = Math.floor(upgrade.cost * 1.15);
+                
+                // PPS再計算
+                gameData.pointsPerSecond = Object.values(gameData.upgrades)
+                    .reduce((total, up) => total + (up.count * up.pps), 0);
+                
+                updateDisplay();
+                renderUpgrades();
+            }
+        }
+        
+        function buyClickUpgrade() {
+            const cost = gameData.clickPower * 100;
+            if (gameData.points >= cost) {
+                gameData.points -= cost;
+                gameData.clickPower++;
+                updateDisplay();
+            }
+        }
+        
+        function updateDisplay() {
+            document.getElementById('points').textContent = formatNumber(gameData.points);
+            document.getElementById('pointsPerSecond').textContent = formatNumber(gameData.pointsPerSecond);
+            document.getElementById('clickPower').textContent = gameData.clickPower;
+            document.getElementById('totalClicks').textContent = formatNumber(gameData.totalClicks);
+            
+            // クリック強化ボタン
+            const clickCost = gameData.clickPower * 100;
+            document.getElementById('clickUpgradeCost').textContent = formatNumber(clickCost);
+            document.getElementById('clickUpgradeBtn').disabled = gameData.points < clickCost;
+        }
+        
+        function renderUpgrades() {
+            const upgradeList = document.getElementById('upgradeList');
+            upgradeList.innerHTML = '';
+            
+            Object.entries(gameData.upgrades).forEach(([key, upgrade]) => {
+                const upgradeDiv = document.createElement('div');
+                upgradeDiv.className = 'upgrade-item';
+                
+                upgradeDiv.innerHTML = `
+                    <div class="upgrade-info">
+                        <div class="upgrade-icon">${upgrade.icon}</div>
+                        <div class="upgrade-details">
+                            <div class="upgrade-name">${upgrade.name}</div>
+                            <div class="upgrade-description">${upgrade.description}</div>
+                        </div>
+                    </div>
+                    <div class="upgrade-count">${upgrade.count}</div>
+                    <button class="buy-btn" onclick="buyUpgrade('${key}')" 
+                            ${gameData.points < upgrade.cost ? 'disabled' : ''}>
+                        ${formatNumber(upgrade.cost)}
+                    </button>
+                `;
+                
+                upgradeList.appendChild(upgradeDiv);
+            });
+        }
+        
+        function formatNumber(num) {
+            if (num >= 1e12) return (num / 1e12).toFixed(2) + 'T';
+            if (num >= 1e9) return (num / 1e9).toFixed(2) + 'B';
+            if (num >= 1e6) return (num / 1e6).toFixed(2) + 'M';
+            if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+            return Math.floor(num).toLocaleString();
+        }
+    </script>
 </body>
 </html>
