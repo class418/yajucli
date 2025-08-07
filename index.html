@@ -12,11 +12,11 @@
   <div id="autoClickDisplay">自動0.0/秒</div>
   <div id="scoreDisplay">ポイント: 0</div>
   <img id="clickerBtn" src="/yajucli/assets/yajuu.png" alt="野獣先輩" draggable="false" />
-  <input id="nameInput" type="text" placeholder="先輩の名前を入力" />
+  <input id="nameInput" type="text" placeholder="先輩の名前を入力（例：野獣）" />
 </div>
 
 <div id="centerPanel">
-  <!-- 施設アイコンなど -->
+  <img id="feverButton" src="/yajucli/assets/feverbtn.png" style="display: none;" />
 </div>
 
 <div id="rightPanel">
@@ -28,23 +28,28 @@
     <div class="sectionTitle">アップグレード</div>
     <div id="upgradeButtons"></div>
   </div>
-  <div id="debugPanel" style="display: none; margin-top: 20px;">
+
+  <div style="margin-top: 20px;">
     <div class="sectionTitle">デバッグモード</div>
     <label style="user-select:none; cursor:pointer;">
-      <input type="checkbox" id="debugToggle" />
-      ON/OFF
+      <input type="checkbox" id="debugToggle" style="display:none;" />
+      <span id="debugLabel" style="display:none;">ON/OFF</span>
     </label>
-    <div id="debugTools" style="display: none; margin-top:10px;">
-      <button id="forceFeverBtn">フィーバーボタン強制表示</button><br />
-      <input type="number" id="pointEditor" placeholder="ポイント書き換え" />
-      <button id="applyPointBtn">適用</button>
+
+    <div id="debugControls" style="display:none;">
+      <button id="forceFeverBtn">フィーバー強制出現</button>
+      <input id="pointOverrideInput" type="number" placeholder="ポイント上書き" />
+      <button id="setPointBtn">ポイント設定</button>
     </div>
   </div>
+
   <div style="margin-top: 20px;">
-    <div class="sectionTitle">セーブデータ</div>
-    <button id="deleteDataBtn">セーブデータ削除</button>
+    <div class="sectionTitle">セーブデータ管理</div>
+    <button id="resetDataBtn">データを削除する</button>
   </div>
 </div>
+
+<audio id="feverAudio" src="/yajucli/assets/fever.mp3" loop></audio>
 
 <script src="main.js"></script>
 </body>
