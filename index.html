@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>野獣先輩クリッカー</title>
     <style>
         * {
@@ -17,6 +17,12 @@
             min-height: 100vh;
             color: white;
             user-select: none;
+            touch-action: manipulation;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            -ms-touch-action: manipulation;
+            zoom: 1;
         }
         
         .container {
@@ -94,6 +100,11 @@
             border-radius: 15px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             object-fit: cover;
+            touch-action: manipulation;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+            -webkit-tap-highlight-color: transparent;
+            -ms-touch-action: manipulation;
         }
         
         .yajuu-image:hover {
@@ -303,7 +314,11 @@
         <div class="game-area">
             <div class="click-area">
                 <div class="yajuu-container">
-                    <img src="assets/yajuu.png" alt="野獣先輩" class="yajuu-image" id="yajuuImage" onclick="clickYajuu()">
+                    <img src="assets/yajuu.png" alt="野獣先輩" class="yajuu-image" id="yajuuImage" 
+                         onmousedown="clickYajuu(event)" 
+                         ontouchstart="clickYajuu(event)"
+                         ondragstart="return false;"
+                         oncontextmenu="return false;">
                 </div>
                 
                 <button class="fever-btn" id="feverBtn" onclick="activateFever()" disabled>
@@ -344,19 +359,98 @@
             }
         };
         
-        // 音声要素
-        let clickSound, feverSound;
+        // 音声関連
+        let audioContext;
+        let clickBuffer, feverBuffer;
+        
+        async function initAudio() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                
+                // 音声ファイルを読み込み
+                const [clickResponse, feverResponse] = await Promise.all([
+                    fetch('assets/click.mp3').catch(() => null),
+                    fetch('assets/fever.mp3').catch(() => null)
+                ]);
+                
+                if (clickResponse) {
+                    const clickArrayBuffer = await clickResponse.arrayBuffer();
+                    clickBuffer = await audioContext.decodeAudioData(clickArrayBuffer);
+                }
+                
+                if (feverResponse) {
+                    const feverArrayBuffer = await feverResponse.arrayBuffer();
+                    feverBuffer = await audioContext.decodeAudioData(feverArrayBuffer);
+                }
+            } catch (e) {
+                console.log('Web Audio API初期化失敗:', e);
+            }
+        }
+        
+        function playSound(buffer, volume = 0.3) {
+            if (!audioContext || !buffer) return;
+            
+            try {
+                const source = audioContext.createBufferSource();
+                const gainNode = audioContext.createGain();
+                
+                source.buffer = buffer;
+                gainNode.gain.value = volume;
+                
+                source.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                source.start();
+            } catch (e) {
+                console.log('音声再生エラー:', e);
+            }
+        }
         
         // ページ読み込み時の初期化
         window.onload = function() {
-            try {
-                clickSound = new Audio('assets/click.mp3');
-                feverSound = new Audio('assets/fever.mp3');
-                clickSound.volume = 0.3;
-                feverSound.volume = 0.5;
-            } catch (e) {
-                console.log('音声ファイルの読み込みに失敗しました');
-            }
+            // 音声初期化
+            initAudio();
+            
+            // ズーム完全無効化
+            document.addEventListener('gesturestart', function(e) {
+                e.preventDefault();
+            });
+            
+            document.addEventListener('gesturechange', function(e) {
+                e.preventDefault();
+            });
+            
+            document.addEventListener('gestureend', function(e) {
+                e.preventDefault();
+            });
+            
+            document.addEventListener('dblclick', function(e) {
+                e.preventDefault();
+                return false;
+            });
+            
+            document.addEventListener('mousedown', function(e) {
+                if (e.detail > 1) {
+                    e.preventDefault();
+                }
+            });
+            
+            // タッチズーム無効化
+            let lastTouchEnd = 0;
+            document.addEventListener('touchend', function(e) {
+                const now = (new Date()).getTime();
+                if (now - lastTouchEnd <= 300) {
+                    e.preventDefault();
+                }
+                lastTouchEnd = now;
+            }, { passive: false });
+            
+            // ピンチズーム無効化
+            document.addEventListener('touchmove', function(e) {
+                if (e.touches.length > 1) {
+                    e.preventDefault();
+                }
+            }, { passive: false });
             
             updateDisplay();
             renderUpgrades();
@@ -377,7 +471,18 @@
             }, 1000);
         };
         
-        function clickYajuu() {
+        function clickYajuu(event) {
+            // イベント伝播停止
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            
+            // AudioContext再開（ブラウザポリシー対応）
+            if (audioContext && audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+            
             let points = gameData.feverActive ? gameData.clickPower * 5 : gameData.clickPower;
             gameData.points += points;
             gameData.totalClicks++;
@@ -386,10 +491,7 @@
             showClickEffect(points);
             
             // 音声再生
-            if (clickSound) {
-                clickSound.currentTime = 0;
-                clickSound.play().catch(() => {});
-            }
+            playSound(clickBuffer, 0.3);
             
             updateDisplay();
         }
@@ -423,9 +525,7 @@
             document.body.classList.add('fever-mode');
             
             // フィーバー音声再生
-            if (feverSound) {
-                feverSound.play().catch(() => {});
-            }
+            playSound(feverBuffer, 0.5);
             
             // タイマー表示
             let timeLeft = 10;
