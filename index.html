@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8" />
-<title>野獣先輩クリックゲーム</title>
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-<link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8" />
+  <title>野獣先輩クリックゲーム</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
@@ -16,7 +16,7 @@
 </div>
 
 <div id="centerPanel">
-  <!-- 施設アイコンがここに -->
+  <!-- 施設アイコンなど -->
 </div>
 
 <div id="rightPanel">
@@ -28,12 +28,21 @@
     <div class="sectionTitle">アップグレード</div>
     <div id="upgradeButtons"></div>
   </div>
-    <div style="margin-top: 20px;">
+  <div id="debugPanel" style="display: none; margin-top: 20px;">
     <div class="sectionTitle">デバッグモード</div>
     <label style="user-select:none; cursor:pointer;">
       <input type="checkbox" id="debugToggle" />
       ON/OFF
     </label>
+    <div id="debugTools" style="display: none; margin-top:10px;">
+      <button id="forceFeverBtn">フィーバーボタン強制表示</button><br />
+      <input type="number" id="pointEditor" placeholder="ポイント書き換え" />
+      <button id="applyPointBtn">適用</button>
+    </div>
+  </div>
+  <div style="margin-top: 20px;">
+    <div class="sectionTitle">セーブデータ</div>
+    <button id="deleteDataBtn">セーブデータ削除</button>
   </div>
 </div>
 
