@@ -285,24 +285,21 @@ function playPuniAnimation() {
   setTimeout(()=>clickerBtn.style.transform = 'scale(1,1)',100);
 }
 
-clickerBtn.addEventListener('click', () => {
+// 連打用イベント（押しっぱなしでは加算されない）
+function handleTap(e) {
+  e.preventDefault(); // ダブルタップズーム防止
   initAudioContext();
   if (audioCtx.state === 'suspended') audioCtx.resume();
   points += pointsPerClick();
   updateScore();
   playClickSound();
   playPuniAnimation();
-});
+}
 
-// ダブルタップズーム防止（連打に影響出にくい最小限の処理）
-let lastTouchEnd = 0;
-document.addEventListener('touchend', function (e) {
-  const now = Date.now();
-  if (now - lastTouchEnd <= 300) {
-    e.preventDefault();
-  }
-  lastTouchEnd = now;
-}, { passive: false });
+// 高速連打対応
+clickerBtn.addEventListener('pointerdown', handleTap, { passive: false });
+clickerBtn.addEventListener('touchstart', handleTap, { passive: false });
+clickerBtn.addEventListener('mousedown', handleTap, { passive: false });
 
 // 長押し保存防止
 document.addEventListener('contextmenu', e => e.preventDefault());
