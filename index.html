@@ -6,15 +6,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
 <style>
   body {
-  margin: 0; padding: 0;
-  background: #282c34;
-  color: #fff;
-  font-family: Arial, sans-serif;
-  height: 100vh;
-  display: flex;
-  overflow: hidden;
-  zoom: 0.5;
-}
+    margin: 0; padding: 0;
+    background: #282c34;
+    color: #fff;
+    font-family: Arial, sans-serif;
+    height: 100vh;
+    display: flex;
+    overflow: hidden;
+  }
   #leftPanel, #centerPanel, #rightPanel {
     padding: 10px;
     box-sizing: border-box;
@@ -107,30 +106,10 @@
   .buyButton:hover:not(.disabled) {
     background: #666;
   }
-  html, body {
-  margin: 0;
-  padding: 0;
-  width: 100vw;
-  height: 100vh;
-  overflow: hidden;
-}
-
-#scaleWrapper {
-  transform: scale(0.5);
-  transform-origin: top left;
-  width: 200vw;
-  height: 100vh;
-  display: flex;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) scale(0.5); /* ← 中央に寄せてから縮小 */
-}
-
 </style>
 </head>
 <body>
-<div id="scaleWrapper">
+
 <div id="leftPanel">
   <div id="autoClickDisplay">自動0.0/秒</div>
   <img id="clickerBtn" src="/yajucli/assets/yajuu.png" alt="野獣先輩" draggable="false" />
@@ -356,6 +335,6 @@ window.addEventListener('load', () => {
   updateScore();
 });
 </script>
-</div>
+
 </body>
 </html>
