@@ -1,231 +1,341 @@
+[media pointer="file-service://file-BctcKLFGwz4R5FrGRK3URW"]
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>野獣先輩クリックゲーム</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: sans-serif;
-      background: #1e1e1e;
-      color: white;
-    }
-
-    #gameContainer {
-      display: flex;
-      height: 100vh;
-    }
-
-    #leftPanel {
-      flex: 1.2;
-      background: #2a2f3a;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding-top: 30px;
-      padding-bottom: 30px;
-      position: relative;
-    }
-
-    #centerPanel {
-      flex: 3;
-      background: #1e1e1e;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    #rightPanel {
-      flex: 0.8;
-      background: #2a2f3a;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    #autoClickDisplay {
-      font-size: 16px;
-      margin-bottom: auto;
-    }
-
-    #scoreDisplay {
-      font-size: 20px;
-      margin-top: auto;
-      user-select: none;
-    }
-
-    #clickImage {
-      cursor: pointer;
-      width: 150px;
-      height: 150px;
-      user-select: none;
-    }
-
-    .facilityGroup {
-      margin-bottom: 20px;
-    }
-
-    .facilityGroup h3 {
-      margin-bottom: 10px;
-    }
-
-    .facilityButton {
-      background-color: #444;
-      color: white;
-      border: none;
-      padding: 10px;
-      margin-bottom: 5px;
-      width: 100%;
-      text-align: left;
-      cursor: pointer;
-      border-radius: 5px;
-      font-size: 14px;
-    }
-
-    .facilityButton.disabled {
-      opacity: 0.4;
-      pointer-events: none;
-    }
-
-    @media (max-width: 600px) {
-      #leftPanel { flex: 1.5; }
-      #centerPanel { flex: 4; }
-      #rightPanel { flex: 0.5; }
-    }
-  </style>
+<meta charset="UTF-8" />
+<title>野獣先輩クリックゲーム</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<style>
+  body {
+    margin: 0; padding: 0;
+    background: #282c34;
+    color: #fff;
+    font-family: Arial, sans-serif;
+    height: 100vh;
+    display: flex;
+    overflow: hidden;
+  }
+  #leftPanel, #centerPanel, #rightPanel {
+    padding: 10px;
+    box-sizing: border-box;
+    overflow-y: auto;
+  }
+  #leftPanel {
+    flex: 1;
+    background: #2a2f3a;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  #centerPanel {
+    flex: 2;
+    background: #333;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    align-content: flex-start;
+  }
+  #rightPanel {
+    flex: 1;
+    background: #222;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+  }
+  #clickerBtn {
+    width: 180px;
+    height: 180px;
+    border-radius: 15px;
+    object-fit: contain;
+    animation: spin 5s linear infinite;
+    cursor: pointer;
+    user-select: none;
+    transition: transform 0.15s ease;
+    -webkit-user-drag: none;
+    margin-bottom: 10px;
+  }
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  #scoreDisplay {
+    font-size: 24px;
+    margin-top: 5px;
+    text-align: center;
+    user-select: none;
+  }
+  #autoClickDisplay {
+    position: absolute;
+    top: 5px;
+    background: rgba(0,0,0,0.4);
+    padding: 2px 6px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: bold;
+    color: #ffeb3b;
+    text-shadow: 0 0 4px #000;
+    user-select: none;
+  }
+  .facilityIcon {
+    width: 48px;  /* 施設アイコンを少し小さく */
+    height: 48px;
+    object-fit: contain;
+    -webkit-user-drag: none;
+    user-select: none;
+    margin: 0 1px 1px 0; /* 横にぎゅっと詰める */
+    position: relative;
+  }
+  .sectionTitle {
+    font-weight: bold;
+    margin: 10px 0 5px;
+    border-bottom: 1px solid #555;
+  }
+  .buyButton {
+    background: #444;
+    border-radius: 8px;
+    padding: 8px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .buyButton.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .buyButton:hover:not(.disabled) {
+    background: #666;
+  }
+</style>
 </head>
 <body>
-  <div id="gameContainer">
-    <div id="leftPanel">
-      <div id="autoClickDisplay">自動クリック: 0.0/秒</div>
-      <div id="scoreDisplay">ポイント: 0.0</div>
-    </div>
-    <div id="centerPanel">
-      <img src="https://i.imgur.com/Ep6xQtr.png" id="clickImage" />
-    </div>
-    <div id="rightPanel">
-      <div class="facilityGroup" id="buyFacilities">
-        <h3>施設購入</h3>
-        <!-- ボタン生成される -->
-      </div>
-      <div class="facilityGroup" id="upgradeFacilities">
-        <h3>アップグレード</h3>
-        <!-- ボタン生成される -->
-      </div>
-    </div>
+
+<div id="leftPanel">
+  <div id="autoClickDisplay">自動0.0/秒</div>
+  <img id="clickerBtn" src="/yajucli/assets/yajuu.png" alt="野獣先輩" draggable="false" />
+  <div id="scoreDisplay">ポイント: 0</div>
+</div>
+
+<div id="centerPanel">
+  <!-- 購入した施設アイコンがここに横に並びます -->
+</div>
+
+<div id="rightPanel">
+  <div>
+    <div class="sectionTitle">施設購入</div>
+    <div id="facilityButtons"></div>
   </div>
+  <div>
+    <div class="sectionTitle">アップグレード</div>
+    <div id="upgradeButtons"></div>
+  </div>
+</div>
 
-  <script>
-    let points = 0;
-    let clickPower = 1;
-    let autoClickPower = 0;
+<script>
+let points = 0;
+let clickPowerLevel = 0;
+let autoClickLevel = 0;
+let takuyaLevel = 0;
 
-    const scoreDisplay = document.getElementById("scoreDisplay");
-    const autoClickDisplay = document.getElementById("autoClickDisplay");
+const clickerBtn = document.getElementById('clickerBtn');
+const scoreDisplay = document.getElementById('scoreDisplay');
+const autoClickDisplay = document.getElementById('autoClickDisplay');
+const facilityButtons = document.getElementById('facilityButtons');
+const upgradeButtons = document.getElementById('upgradeButtons');
+const centerPanel = document.getElementById('centerPanel');
 
-    const clickImage = document.getElementById("clickImage");
+let autoClickInterval = null;
+const AudioContext = window.AudioContext || window.webkitAudioContext;
+let audioCtx = null;
+let clickBuffer = null;
 
-    const facilities = [
-      {
-        name: "自動クリック",
-        basePrice: 10,
-        level: 0,
-        type: "buy",
-        onBuy: function () {
-          this.level++;
-          autoClickPower += 0.1;
-        },
-      },
-      {
-        name: "拓也さん",
-        basePrice: 100,
-        level: 0,
-        type: "buy",
-        onBuy: function () {
-          this.level++;
-          autoClickPower += 1;
-        },
-      },
-      {
-        name: "クリック力強化",
-        basePrice: 50,
-        level: 0,
-        type: "upgrade",
-        onBuy: function () {
-          this.level++;
-          clickPower += 1;
-        },
-      },
-    ];
+function initAudioContext() {
+  if (!audioCtx) audioCtx = new AudioContext();
+}
+function loadClickSound() {
+  fetch('/yajucli/assets/click.mp3')
+    .then(r => r.arrayBuffer())
+    .then(buf => audioCtx.decodeAudioData(buf))
+    .then(decoded => clickBuffer = decoded);
+}
+function playClickSound() {
+  if (!clickBuffer || !audioCtx) return;
+  const src = audioCtx.createBufferSource();
+  src.buffer = clickBuffer;
+  src.connect(audioCtx.destination);
+  src.start();
+}
 
-    function formatPoints(num) {
-      if (num >= 1e9) return (num / 1e9).toFixed(1) + "B";
-      if (num >= 1e6) return (num / 1e6).toFixed(1) + "M";
-      if (num >= 1e3) return (num / 1e3).toFixed(1) + "K";
-      return num.toFixed(1);
-    }
+function calcPrice(base, level) {
+  return Math.floor(base * Math.pow(1.15, level));
+}
+function pointsPerClick() {
+  return 1 * (1 + 0.2 * clickPowerLevel);
+}
+function autoClickPerSec() {
+  return autoClickLevel * 0.1 + takuyaLevel * 1.0;
+}
+function updateAutoClickDisplay() {
+  autoClickDisplay.textContent = `自動${autoClickPerSec().toFixed(1)}/秒`;
+}
+function updateScore() {
+  scoreDisplay.textContent = `ポイント: ${points.toFixed(1)}`;
+  updateButtons();
+}
 
-    function updateScore() {
-      scoreDisplay.textContent = `ポイント: ${formatPoints(points)}`;
-      autoClickDisplay.textContent = `自動クリック: ${autoClickPower.toFixed(1)}/秒`;
-      updateButtons();
-    }
+// 施設アイコンは最大2列まで表示、3列目は描画しない（JavaScriptで制御）
+function addFacilityImages(src, count) {
+  // 既存のアイコン全部消す
+  centerPanel.innerHTML = '';
 
-    clickImage.addEventListener("click", () => {
-      points += clickPower;
-      updateScore();
-    });
+  const maxPerRow = 10; // 横最大10個（10×2 = 20個まで）
+  const maxRows = 2;
 
-    function createFacilityButtons() {
-      const buyContainer = document.getElementById("buyFacilities");
-      const upgradeContainer = document.getElementById("upgradeFacilities");
+  // 表示数は最大20個まで
+  const showCount = Math.min(count, maxPerRow * maxRows);
 
-      facilities.forEach((f, index) => {
-        const btn = document.createElement("button");
-        btn.className = "facilityButton";
-        btn.id = `facility-${index}`;
-        btn.textContent = `${f.name} Lv.${f.level} - ${f.basePrice}pt`;
+  for(let i = 0; i < showCount; i++) {
+    const img = document.createElement('img');
+    img.src = src;
+    img.classList.add('facilityIcon');
 
-        if (f.type === "buy") {
-          buyContainer.appendChild(btn);
-        } else {
-          upgradeContainer.appendChild(btn);
-        }
-      });
-    }
+    // 横幅が10個で折り返しなので折り返しはCSSのflex-wrapで対応
+    centerPanel.appendChild(img);
+  }
+}
 
-    function updateButtons() {
-      facilities.forEach((f, index) => {
-        const btn = document.getElementById(`facility-${index}`);
-        const price = Math.floor(f.basePrice * Math.pow(1.5, f.level));
-        btn.textContent = `${f.name} Lv.${f.level} - ${formatPoints(price)}pt`;
-
-        if (points >= price) {
-          btn.classList.remove("disabled");
-          btn.onclick = () => {
-            if (points >= price) {
-              points -= price;
-              f.onBuy();
-              updateScore();
-            }
-          };
-        } else {
-          btn.classList.add("disabled");
-          btn.onclick = null;
-        }
-      });
-    }
-
-    function gameLoop() {
-      points += autoClickPower / 10;
-      updateScore();
-    }
-
-    createFacilityButtons();
+function startAutoClick() {
+  if (autoClickInterval) return;
+  autoClickInterval = setInterval(() => {
+    points += autoClickPerSec();
     updateScore();
-    setInterval(gameLoop, 100);
-  </script>
+    playClickSound();
+  }, 1000);
+}
+
+const facilities = [
+  { id:'cursor', name:'自動クリック', baseCost:10, level:0, icon:'/yajucli/assets/cursor.png',
+    onBuy: function(){
+      this.level++;
+      autoClickLevel = this.level;
+      addAllFacilities();
+      updateAutoClickDisplay();
+      if (autoClickLevel + takuyaLevel > 0) startAutoClick();
+    }
+  },
+  { id:'takuya', name:'拓也さん', baseCost:100, level:0, icon:'/yajucli/assets/takuya.png',
+    onBuy: function(){
+      this.level++;
+      takuyaLevel = this.level;
+      addAllFacilities();
+      updateAutoClickDisplay();
+      if (autoClickLevel + takuyaLevel > 0) startAutoClick();
+    }
+  }
+];
+const upgrades = [
+  { id:'clickPower', name:'クリック力強化', baseCost:50, level:0,
+    onBuy:function(){
+      this.level++;
+      clickPowerLevel = this.level;
+    }
+  }
+];
+
+function addAllFacilities() {
+  // クリック施設と拓也施設をまとめて中央パネルに表示
+  centerPanel.innerHTML = '';
+  // まずカーソル施設
+  addFacilityImages('/yajucli/assets/cursor.png', autoClickLevel);
+  // つぎに拓也施設（まとめて追加）
+  addFacilityImages('/yajucli/assets/takuya.png', takuyaLevel);
+}
+
+function createButtons() {
+  facilities.forEach(f => {
+    const btn = document.createElement('div');
+    btn.id = 'facility-'+f.id;
+    btn.classList.add('buyButton');
+    facilityButtons.appendChild(btn);
+  });
+  upgrades.forEach(u => {
+    const btn = document.createElement('div');
+    btn.id = 'upgrade-'+u.id;
+    btn.classList.add('buyButton');
+    upgradeButtons.appendChild(btn);
+  });
+  updateButtons();
+}
+
+function updateButtons() {
+  facilities.forEach(f => {
+    const btn = document.getElementById('facility-'+f.id);
+    const price = calcPrice(f.baseCost, f.level);
+    btn.textContent = `${f.name} Lv.${f.level} - ${price}pt`;
+    if (points >= price) {
+      btn.classList.remove('disabled');
+      btn.onclick = () => {
+        if (points >= price) {
+          points -= price;
+          f.onBuy();
+          updateScore();
+        }
+      };
+    } else {
+      btn.classList.add('disabled');
+      btn.onclick = null;
+    }
+  });
+  upgrades.forEach(u => {
+    const btn = document.getElementById('upgrade-'+u.id);
+    const price = calcPrice(u.baseCost, u.level);
+    btn.textContent = `${u.name} Lv.${u.level} - ${price}pt`;
+    if (points >= price) {
+      btn.classList.remove('disabled');
+      btn.onclick = () => {
+        if (points >= price) {
+          points -= price;
+          u.onBuy();
+          updateScore();
+        }
+      };
+    } else {
+      btn.classList.add('disabled');
+      btn.onclick = null;
+    }
+  });
+}
+
+function playPuniAnimation() {
+  clickerBtn.style.transform = 'scale(1.1,0.9)';
+  setTimeout(()=>clickerBtn.style.transform = 'scale(1,1)',100);
+}
+
+// 連打用イベント（押しっぱなしでは加算されない）
+function handleTap(e) {
+  e.preventDefault(); // ダブルタップズーム防止
+  initAudioContext();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  points += pointsPerClick();
+  updateScore();
+  playClickSound();
+  playPuniAnimation();
+}
+
+clickerBtn.addEventListener('pointerdown', handleTap, { passive: false });
+
+// 長押し保存防止
+document.addEventListener('contextmenu', e => e.preventDefault());
+
+window.addEventListener('load', () => {
+  initAudioContext();
+  loadClickSound();
+  updateAutoClickDisplay();
+  createButtons();
+  updateScore();
+});
+</script>
+
 </body>
 </html>
