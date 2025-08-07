@@ -6,52 +6,100 @@ body {
   font-family: sans-serif;
   display: flex;
   flex-direction: row;
+  justify-content: space-between;
   height: 100vh;
   overflow: hidden;
 }
 
 #leftPanel, #centerPanel, #rightPanel {
-  padding: 10px;
+  padding: 20px;
   box-sizing: border-box;
+  overflow-y: auto;
 }
 
 #leftPanel {
-  width: 25%;
+  width: 30%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-right: 2px solid #444;
 }
 
 #centerPanel {
-  width: 50%;
-  text-align: center;
+  width: 20%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 #rightPanel {
-  width: 25%;
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 20px;
+  border-left: 2px solid #444;
 }
 
 #clickerBtn {
-  width: 100%;
-  max-width: 300px;
-  cursor: pointer;
+  width: 200px;
+  height: 200px;
+  margin: 20px 0;
   transition: transform 0.1s;
 }
 
-input[type="text"], input[type="number"] {
-  width: 100%;
-  margin-top: 10px;
-  padding: 5px;
-  font-size: 16px;
-  box-sizing: border-box;
+#clickerBtn:active {
+  transform: scale(0.95);
 }
 
-button {
-  margin-top: 10px;
-  padding: 5px 10px;
-  font-size: 14px;
-  cursor: pointer;
+#nameInput {
+  padding: 10px;
+  font-size: 1em;
+  width: 80%;
+  box-sizing: border-box;
 }
 
 .sectionTitle {
   font-weight: bold;
+  font-size: 1.2em;
+  margin-bottom: 10px;
+}
+
+button, input[type="text"], input[type="number"] {
+  padding: 8px;
+  margin: 5px 0;
+  font-size: 1em;
+}
+
+#autoClickDisplay, #scoreDisplay {
+  font-size: 1.3em;
+  margin: 5px 0;
+}
+
+#feverBtn {
+  width: 120px;
   margin-top: 20px;
-  margin-bottom: 5px;
+  cursor: pointer;
+  display: none;
+}
+
+.debug-controls {
+  margin-top: 10px;
+}
+
+.debug-controls input[type="text"] {
+  width: 120px;
+}
+
+#deleteDataBtn {
+  background-color: red;
+  color: white;
+  border: none;
+  cursor: pointer;
+  padding: 10px;
+  font-weight: bold;
+}
+
+#deleteDataBtn:hover {
+  background-color: darkred;
 }
