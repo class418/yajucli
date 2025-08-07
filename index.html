@@ -1,4 +1,3 @@
-[media pointer="file-service://file-BctcKLFGwz4R5FrGRK3URW"]
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -79,12 +78,12 @@
     user-select: none;
   }
   .facilityIcon {
-    width: 48px;  /* 施設アイコンを少し小さく */
+    width: 48px;
     height: 48px;
     object-fit: contain;
     -webkit-user-drag: none;
     user-select: none;
-    margin: 0 1px 1px 0; /* 横にぎゅっと詰める */
+    margin: 0 1px 1px 0;
     position: relative;
   }
   .sectionTitle {
@@ -186,21 +185,17 @@ function updateScore() {
 
 // 施設アイコンは最大2列まで表示、3列目は描画しない（JavaScriptで制御）
 function addFacilityImages(src, count) {
-  // 既存のアイコン全部消す
   centerPanel.innerHTML = '';
 
-  const maxPerRow = 10; // 横最大10個（10×2 = 20個まで）
+  const maxPerRow = 10; 
   const maxRows = 2;
 
-  // 表示数は最大20個まで
   const showCount = Math.min(count, maxPerRow * maxRows);
 
   for(let i = 0; i < showCount; i++) {
     const img = document.createElement('img');
     img.src = src;
     img.classList.add('facilityIcon');
-
-    // 横幅が10個で折り返しなので折り返しはCSSのflex-wrapで対応
     centerPanel.appendChild(img);
   }
 }
@@ -244,11 +239,8 @@ const upgrades = [
 ];
 
 function addAllFacilities() {
-  // クリック施設と拓也施設をまとめて中央パネルに表示
   centerPanel.innerHTML = '';
-  // まずカーソル施設
   addFacilityImages('/yajucli/assets/cursor.png', autoClickLevel);
-  // つぎに拓也施設（まとめて追加）
   addFacilityImages('/yajucli/assets/takuya.png', takuyaLevel);
 }
 
@@ -280,6 +272,7 @@ function updateButtons() {
           points -= price;
           f.onBuy();
           updateScore();
+          saveGame();
         }
       };
     } else {
@@ -298,6 +291,7 @@ function updateButtons() {
           points -= price;
           u.onBuy();
           updateScore();
+          saveGame();
         }
       };
     } else {
@@ -312,29 +306,85 @@ function playPuniAnimation() {
   setTimeout(()=>clickerBtn.style.transform = 'scale(1,1)',100);
 }
 
-// 連打用イベント（押しっぱなしでは加算されない）
 function handleTap(e) {
-  e.preventDefault(); // ダブルタップズーム防止
+  e.preventDefault();
   initAudioContext();
   if (audioCtx.state === 'suspended') audioCtx.resume();
   points += pointsPerClick();
   updateScore();
   playClickSound();
   playPuniAnimation();
+  saveGame();
 }
 
 clickerBtn.addEventListener('pointerdown', handleTap, { passive: false });
 
-// 長押し保存防止
 document.addEventListener('contextmenu', e => e.preventDefault());
+
+// --------- データセーブ・ロード ---------
+
+function getSaveData() {
+  return {
+    points,
+    clickPowerLevel,
+    autoClickLevel,
+    takuyaLevel,
+    facilities: facilities.map(f => f.level),
+    upgrades: upgrades.map(u => u.level),
+  };
+}
+
+function saveGame() {
+  try {
+    const data = getSaveData();
+    localStorage.setItem('yajuClickerSave', JSON.stringify(data));
+  } catch (e) {
+    console.error('セーブ失敗:', e);
+  }
+}
+
+function loadGame() {
+  const saved = localStorage.getItem('yajuClickerSave');
+  if (!saved) return;
+
+  try {
+    const data = JSON.parse(saved);
+
+    points = data.points || 0;
+    clickPowerLevel = data.clickPowerLevel || 0;
+    autoClickLevel = data.autoClickLevel || 0;
+    takuyaLevel = data.takuyaLevel || 0;
+
+    if (data.facilities && Array.isArray(data.facilities)) {
+      facilities.forEach((f, i) => {
+        f.level = data.facilities[i] || 0;
+      });
+      autoClickLevel = facilities.find(f => f.id === 'cursor')?.level || 0;
+      takuyaLevel = facilities.find(f => f.id === 'takuya')?.level || 0;
+    }
+
+    if (data.upgrades && Array.isArray(data.upgrades)) {
+      upgrades.forEach((u, i) => {
+        u.level = data.upgrades[i] || 0;
+      });
+      clickPowerLevel = upgrades.find(u => u.id === 'clickPower')?.level || 0;
+    }
+  } catch (e) {
+    console.error('ロード失敗:', e);
+  }
+}
 
 window.addEventListener('load', () => {
   initAudioContext();
   loadClickSound();
+  loadGame();
   updateAutoClickDisplay();
   createButtons();
+  addAllFacilities();
   updateScore();
+  if (autoClickLevel + takuyaLevel > 0) startAutoClick();
 });
+
 </script>
 
 </body>
