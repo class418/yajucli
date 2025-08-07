@@ -296,10 +296,8 @@ function handleTap(e) {
   playPuniAnimation();
 }
 
-// 高速連打対応
+// 高速連打対応（pointerdownだけ）
 clickerBtn.addEventListener('pointerdown', handleTap, { passive: false });
-clickerBtn.addEventListener('touchstart', handleTap, { passive: false });
-clickerBtn.addEventListener('mousedown', handleTap, { passive: false });
 
 // 長押し保存防止
 document.addEventListener('contextmenu', e => e.preventDefault());
