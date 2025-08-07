@@ -1,0 +1,144 @@
+body {
+  margin: 0; padding: 0;
+  background: #282c34;
+  color: #fff;
+  font-family: Arial, sans-serif;
+  height: 100vh;
+  display: flex;
+  overflow: hidden;
+}
+
+#leftPanel, #centerPanel, #rightPanel {
+  padding: 10px;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+#leftPanel {
+  flex: 1;
+  background: #2a2f3a;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+#centerPanel {
+  flex: 2;
+  background: #333;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  align-content: flex-start;
+}
+
+#rightPanel {
+  flex: 1;
+  background: #222;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+#clickerBtn {
+  width: 180px;
+  height: 180px;
+  border-radius: 15px;
+  object-fit: contain;
+  animation: spin 5s linear infinite;
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.15s ease;
+  -webkit-user-drag: none;
+  margin-bottom: 10px;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes spinFast {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+#scoreDisplay {
+  font-size: 24px;
+  margin-top: 5px;
+  text-align: center;
+  user-select: none;
+}
+
+#autoClickDisplay {
+  position: absolute;
+  top: 5px;
+  background: rgba(0,0,0,0.4);
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: bold;
+  color: #ffeb3b;
+  text-shadow: 0 0 4px #000;
+  user-select: none;
+}
+
+.facilityIcon {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  -webkit-user-drag: none;
+  user-select: none;
+  margin: 0 1px 1px 0;
+  position: relative;
+}
+
+.sectionTitle {
+  font-weight: bold;
+  margin: 10px 0 5px;
+  border-bottom: 1px solid #555;
+}
+
+.buyButton {
+  background: #444;
+  border-radius: 8px;
+  padding: 8px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.buyButton.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.buyButton:hover:not(.disabled) {
+  background: #666;
+}
+
+#feverBtn {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 64px;
+  height: 64px;
+  margin-left: -32px;
+  margin-top: -32px;
+  cursor: pointer;
+  display: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  z-index: 10;
+}
+
+input#nameInput {
+  margin-top: 10px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: none;
+  font-size: 16px;
+  width: 160px;
+  text-align: center;
+}
