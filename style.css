@@ -289,22 +289,3 @@ body {
         font-size: 2rem;
     }
 }
-.multiplier-btn {
-    background: rgba(255,255,255,0.1);
-    border: none;
-    color: white;
-    font-weight: bold;
-    padding: 8px 15px;
-    margin: 0 5px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background 0.3s ease;
-}
-.multiplier-btn:hover {
-    background: rgba(255,255,255,0.2);
-}
-.multiplier-btn.active {
-    background: #feca57;
-    color: #333;
-}
-
