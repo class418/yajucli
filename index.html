@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>野獣先輩クリッカー</title>
     <style>
         * {
@@ -10,7 +10,7 @@
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             font-family: 'Arial', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -24,81 +24,81 @@
             -ms-touch-action: manipulation;
             zoom: 1;
         }
-        
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
         }
-        
+
         .header {
             text-align: center;
             margin-bottom: 30px;
         }
-        
+
         .title {
             font-size: 3rem;
             font-weight: bold;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
             margin-bottom: 10px;
             background: linear-gradient(45deg, #ff6b6b, #feca57);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
-        
+
         .stats {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 15px;
             margin-bottom: 30px;
         }
-        
+
         .stat-card {
-            background: rgba(255,255,255,0.1);
+            background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
             border-radius: 15px;
             padding: 20px;
             text-align: center;
-            border: 1px solid rgba(255,255,255,0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
-        
+
         .stat-value {
             font-size: 2rem;
             font-weight: bold;
             color: #feca57;
             margin-bottom: 5px;
         }
-        
+
         .stat-label {
             font-size: 0.9rem;
             opacity: 0.8;
         }
-        
+
         .game-area {
             display: grid;
             grid-template-columns: 1fr 400px;
             gap: 30px;
             align-items: start;
         }
-        
+
         .click-area {
             text-align: center;
         }
-        
+
         .yajuu-container {
             position: relative;
             display: inline-block;
             margin-bottom: 20px;
         }
-        
+
         .yajuu-image {
             width: 300px;
             height: 300px;
             cursor: pointer;
             transition: transform 0.1s ease;
             border-radius: 50%;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
             object-fit: cover;
             touch-action: manipulation;
             -webkit-user-select: none;
@@ -107,7 +107,7 @@
             -ms-touch-action: manipulation;
             animation: rotate 5s linear infinite;
         }
-        
+
         @keyframes rotate {
             from {
                 transform: rotate(0deg);
@@ -116,15 +116,15 @@
                 transform: rotate(360deg);
             }
         }
-        
+
         .yajuu-image:hover {
             filter: brightness(1.1);
         }
-        
+
         .yajuu-image:active {
             filter: brightness(1.2);
         }
-        
+
         .click-effect {
             position: absolute;
             top: 50%;
@@ -134,10 +134,10 @@
             font-size: 2rem;
             font-weight: bold;
             color: #ff6b6b;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
             animation: clickEffect 0.6s ease-out forwards;
         }
-        
+
         @keyframes clickEffect {
             0% {
                 opacity: 1;
@@ -148,7 +148,7 @@
                 transform: translate(-50%, -70%) scale(1.5);
             }
         }
-        
+
         .fever-btn {
             background: none;
             border: none;
@@ -157,38 +157,38 @@
             transition: transform 0.2s ease;
             opacity: 0.7;
         }
-        
+
         .fever-btn:hover {
             transform: scale(1.1);
             opacity: 1;
         }
-        
+
         .fever-btn:disabled {
             opacity: 0.3;
             cursor: not-allowed;
         }
-        
+
         .fever-btn img {
             width: 120px;
             height: auto;
             border-radius: 10px;
         }
-        
+
         .fever-timer {
             font-size: 1.2rem;
             font-weight: bold;
             color: #ff6b6b;
             margin-top: 10px;
         }
-        
+
         .upgrades {
-            background: rgba(255,255,255,0.1);
+            background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
             border-radius: 15px;
             padding: 25px;
-            border: 1px solid rgba(255,255,255,0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
-        
+
         .upgrades-title {
             font-size: 1.5rem;
             font-weight: bold;
@@ -196,29 +196,29 @@
             text-align: center;
             color: #feca57;
         }
-        
+
         .upgrade-item {
-            background: rgba(255,255,255,0.05);
+            background: rgba(255, 255, 255, 0.05);
             border-radius: 10px;
             padding: 15px;
             margin-bottom: 15px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             transition: background 0.2s ease;
         }
-        
+
         .upgrade-item:hover {
-            background: rgba(255,255,255,0.1);
+            background: rgba(255, 255, 255, 0.1);
         }
-        
+
         .upgrade-info {
             display: flex;
             align-items: center;
             flex-grow: 1;
         }
-        
+
         .upgrade-icon {
             width: 50px;
             height: 50px;
@@ -226,30 +226,30 @@
             border-radius: 8px;
             object-fit: cover;
         }
-        
+
         .upgrade-details {
             flex-grow: 1;
         }
-        
+
         .upgrade-name {
             font-weight: bold;
             margin-bottom: 3px;
         }
-        
+
         .upgrade-description {
             font-size: 0.8rem;
             opacity: 0.7;
         }
-        
+
         .upgrade-count {
-            background: rgba(255,255,255,0.2);
+            background: rgba(255, 255, 255, 0.2);
             border-radius: 20px;
             padding: 5px 12px;
             font-size: 0.9rem;
             font-weight: bold;
             margin-right: 10px;
         }
-        
+
         .buy-btn {
             background: linear-gradient(45deg, #ff6b6b, #feca57);
             border: none;
@@ -261,37 +261,41 @@
             transition: transform 0.2s ease;
             min-width: 80px;
         }
-        
+
         .buy-btn:hover {
             transform: translateY(-2px);
         }
-        
+
         .buy-btn:disabled {
-            background: rgba(255,255,255,0.2);
+            background: rgba(255, 255, 255, 0.2);
             cursor: not-allowed;
             transform: none;
         }
-        
+
         .fever-mode {
             background: linear-gradient(135deg, #ff6b6b 0%, #feca57 100%);
             animation: feverPulse 1s ease-in-out infinite alternate;
         }
-        
+
         @keyframes feverPulse {
-            0% { filter: brightness(1); }
-            100% { filter: brightness(1.2); }
+            0% {
+                filter: brightness(1);
+            }
+            100% {
+                filter: brightness(1.2);
+            }
         }
-        
+
         @media (max-width: 768px) {
             .game-area {
                 grid-template-columns: 1fr;
             }
-            
+
             .yajuu-image {
                 width: 250px;
                 height: 250px;
             }
-            
+
             .title {
                 font-size: 2rem;
             }
@@ -304,7 +308,7 @@
             <h1 class="title">野獣先輩クリッカー</h1>
             <p>野獣先輩をクリックして淫夢ポイントを獲得しよう！</p>
         </div>
-        
+
         <div class="stats">
             <div class="stat-card">
                 <div class="stat-value" id="points">0</div>
@@ -323,37 +327,44 @@
                 <div class="stat-label">総クリック数</div>
             </div>
         </div>
-        
+
         <div class="game-area">
             <div class="click-area">
                 <div class="yajuu-container">
-                    <img src="assets/yajuu.png" alt="野獣先輩" class="yajuu-image" id="yajuuImage" 
-                         onmousedown="clickYajuu(event)" 
+                    <img src="assets/yajuu.png" alt="野獣先輩" class="yajuu-image" id="yajuuImage"
+                         onmousedown="clickYajuu(event)"
                          ontouchstart="clickYajuu(event)"
                          ondragstart="return false;"
                          oncontextmenu="return false;">
                 </div>
-                
+
                 <button class="fever-btn" id="feverBtn" onclick="activateFever()" disabled>
-                    <img src="assets/feverbtn.png" alt="フィーバー">
+                    <img src="assets/feverbtn.png" alt="フィーバー" />
                 </button>
-                
+
                 <div class="fever-timer" id="feverTimer" style="display: none;"></div>
-                
+
                 <div style="margin-top: 20px;">
                     <button class="buy-btn" onclick="buyClickUpgrade()" id="clickUpgradeBtn">
-                        クリック強化<br><span id="clickUpgradeCost">100</span>P
+                        クリック強化<br /><span id="clickUpgradeCost">100</span>P
+                    </button>
+                </div>
+
+                <!-- セーブ削除ボタン -->
+                <div style="margin-top: 20px;">
+                    <button class="buy-btn" style="background: #ff4c4c;" onclick="confirmClearSave()">
+                        セーブデータ削除
                     </button>
                 </div>
             </div>
-            
+
             <div class="upgrades">
                 <h2 class="upgrades-title">🏠 アップグレード</h2>
                 <div id="upgradeList"></div>
             </div>
         </div>
     </div>
-    
+
     <script>
         let gameData = {
             points: 0,
@@ -364,33 +375,33 @@
             feverCooldown: false,
             upgrades: {
                 takuya: { count: 0, cost: 15, pps: 1, name: 'TAKUYA', icon: 'assets/takuya.png', description: '毎秒1P' },
-                homo: { count: 0, cost: 100, pps: 5, name: 'ホモ', icon: 'assets/homo.png', description: '毎秒5P' },
-                senpai: { count: 0, cost: 1100, pps: 25, name: '先輩', icon: 'assets/senpai.png', description: '毎秒25P' },
-                danshi: { count: 0, cost: 12000, pps: 100, name: '男子学生', icon: 'assets/chugaku.png', description: '毎秒100P' },
+                mur: { count: 0, cost: 100, pps: 5, name: 'MUR', icon: 'assets/mur.png', description: '毎秒5P' },
+                kouhai: { count: 0, cost: 1100, pps: 25, name: '後輩', icon: 'assets/kouhai.png', description: '毎秒25P' },
+                kmr: { count: 0, cost: 12000, pps: 100, name: 'KMR', icon: 'assets/kmr.png', description: '毎秒100P' },
                 yajuu: { count: 0, cost: 130000, pps: 500, name: '野獣先輩', icon: 'assets/yajuu.png', description: '毎秒500P' },
                 yajuutei: { count: 0, cost: 1400000, pps: 2000, name: '野獣邸', icon: 'assets/yajuutei.png', description: '毎秒2000P' }
             }
         };
-        
+
         // 音声関連
         let audioContext;
         let clickBuffer, feverBuffer;
-        
+
         async function initAudio() {
             try {
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                
+
                 // 音声ファイルを読み込み
                 const [clickResponse, feverResponse] = await Promise.all([
                     fetch('assets/click.mp3').catch(() => null),
                     fetch('assets/fever.mp3').catch(() => null)
                 ]);
-                
+
                 if (clickResponse) {
                     const clickArrayBuffer = await clickResponse.arrayBuffer();
                     clickBuffer = await audioContext.decodeAudioData(clickArrayBuffer);
                 }
-                
+
                 if (feverResponse) {
                     const feverArrayBuffer = await feverResponse.arrayBuffer();
                     feverBuffer = await audioContext.decodeAudioData(feverArrayBuffer);
@@ -399,258 +410,294 @@
                 console.log('Web Audio API初期化失敗:', e);
             }
         }
-        
+
         function playSound(buffer, volume = 0.3) {
             if (!audioContext || !buffer) return;
-            
+
             try {
                 const source = audioContext.createBufferSource();
                 const gainNode = audioContext.createGain();
-                
+
                 source.buffer = buffer;
                 gainNode.gain.value = volume;
-                
+
                 source.connect(gainNode);
                 gainNode.connect(audioContext.destination);
-                
+
                 source.start();
             } catch (e) {
                 console.log('音声再生エラー:', e);
             }
         }
-        
-        // ページ読み込み時の初期化
-        window.onload = function() {
-            // 音声初期化
-            initAudio();
-            
-            // ズーム完全無効化
-            document.addEventListener('gesturestart', function(e) {
-                e.preventDefault();
-            });
-            
-            document.addEventListener('gesturechange', function(e) {
-                e.preventDefault();
-            });
-            
-            document.addEventListener('gestureend', function(e) {
-                e.preventDefault();
-            });
-            
-            document.addEventListener('dblclick', function(e) {
-                e.preventDefault();
-                return false;
-            });
-            
-            document.addEventListener('mousedown', function(e) {
-                if (e.detail > 1) {
-                    e.preventDefault();
+
+        // --- セーブ処理 ---
+
+        const SAVE_KEY = 'yajuuClickerSaveData';
+
+        function saveGame() {
+            try {
+                const saveData = {
+                    points: gameData.points,
+                    pointsPerSecond: gameData.pointsPerSecond,
+                    clickPower: gameData.clickPower,
+                    totalClicks: gameData.totalClicks,
+                    feverActive: gameData.feverActive,
+                    feverCooldown: gameData.feverCooldown,
+                    upgrades: {}
+                };
+
+                for (const key in gameData.upgrades) {
+                    saveData.upgrades[key] = {
+                        count: gameData.upgrades[key].count,
+                        cost: gameData.upgrades[key].cost
+                    };
                 }
-            });
-            
-            // タッチズーム無効化
-            let lastTouchEnd = 0;
-            document.addEventListener('touchend', function(e) {
-                const now = (new Date()).getTime();
-                if (now - lastTouchEnd <= 300) {
-                    e.preventDefault();
+
+                localStorage.setItem(SAVE_KEY, JSON.stringify(saveData));
+            } catch (e) {
+                console.error('セーブ時にエラーが発生しました', e);
+            }
+        }
+
+        function loadGame() {
+            try {
+                const saved = localStorage.getItem(SAVE_KEY);
+                if (saved) {
+                    const saveData = JSON.parse(saved);
+
+                    gameData.points = saveData.points ?? 0;
+                    gameData.pointsPerSecond = saveData.pointsPerSecond ?? 0;
+                    gameData.clickPower = saveData.clickPower ?? 1;
+                    gameData.totalClicks = saveData.totalClicks ?? 0;
+                    gameData.feverActive = saveData.feverActive ?? false;
+                    gameData.feverCooldown = saveData.feverCooldown ?? false;
+
+                    for (const key in saveData.upgrades) {
+                        if (gameData.upgrades[key]) {
+                            gameData.upgrades[key].count = saveData.upgrades[key].count ?? 0;
+                            gameData.upgrades[key].cost = saveData.upgrades[key].cost ?? gameData.upgrades[key].cost;
+                        }
+                    }
                 }
-                lastTouchEnd = now;
-            }, { passive: false });
-            
-            // ピンチズーム無効化
-            document.addEventListener('touchmove', function(e) {
-                if (e.touches.length > 1) {
-                    e.preventDefault();
-                }
-            }, { passive: false });
-            
+            } catch (e) {
+                console.error('ロード時にエラーが発生しました', e);
+            }
+        }
+
+        function confirmClearSave() {
+            if (confirm('本当にセーブデータを削除してゲームをリセットしますか？ この操作は取り消せません。')) {
+                clearSave();
+            }
+        }
+
+        function clearSave() {
+            localStorage.removeItem(SAVE_KEY);
+            resetGameData();
             updateDisplay();
             renderUpgrades();
-            
-            // 自動獲得のタイマー
-            setInterval(() => {
-                if (gameData.pointsPerSecond > 0) {
-                    gameData.points += gameData.pointsPerSecond / 10;
-                    updateDisplay();
+            alert('セーブデータを削除しました。ゲームがリセットされました。');
+        }
+
+        function resetGameData() {
+            gameData.points = 0;
+            gameData.pointsPerSecond = 0;
+            gameData.clickPower = 1;
+            gameData.totalClicks = 0;
+            gameData.feverActive = false;
+            gameData.feverCooldown = false;
+            for (const key in gameData.upgrades) {
+                gameData.upgrades[key].count = 0;
+                switch (key) {
+                    case 'takuya': gameData.upgrades[key].cost = 15; break;
+                    case 'mur': gameData.upgrades[key].cost = 100; break;
+                    case 'kouhai': gameData.upgrades[key].cost = 1100; break;
+                    case 'kmr': gameData.upgrades[key].cost = 12000; break;
+                    case 'yajuu': gameData.upgrades[key].cost = 130000; break;
+                    case 'yajuutei': gameData.upgrades[key].cost = 1400000; break;
+                    default: gameData.upgrades[key].cost = 100;
                 }
-            }, 100);
-            
-            // フィーバーボタンのクールダウンチェック
-            setInterval(() => {
-                if (!gameData.feverActive && !gameData.feverCooldown && gameData.points >= 1000) {
-                    document.getElementById('feverBtn').disabled = false;
-                }
-            }, 1000);
-        };
-        
+            }
+            document.getElementById('yajuuImage').src = 'assets/yajuu.png';
+            document.body.classList.remove('fever-mode');
+            document.getElementById('feverTimer').style.display = 'none';
+        }
+
+        // クリックエフェクト
+        function showClickEffect(points) {
+            const container = document.querySelector('.yajuu-container');
+            const effect = document.createElement('div');
+            effect.classList.add('click-effect');
+            effect.textContent = `+${Math.floor(points)}`;
+            container.appendChild(effect);
+            setTimeout(() => effect.remove(), 600);
+        }
+
+        // 表示更新
+        function updateDisplay() {
+            document.getElementById('points').textContent = Math.floor(gameData.points);
+            document.getElementById('pointsPerSecond').textContent = Math.floor(gameData.pointsPerSecond);
+            document.getElementById('clickPower').textContent = Math.floor(gameData.clickPower);
+            document.getElementById('totalClicks').textContent = gameData.totalClicks;
+            document.getElementById('clickUpgradeCost').textContent = gameData.clickPower * 100;
+
+            // フィーバーボタンの有効無効
+            const feverBtn = document.getElementById('feverBtn');
+            feverBtn.disabled = (gameData.points < 1000 || gameData.feverActive || gameData.feverCooldown);
+        }
+
+        // アップグレード表示
+        function renderUpgrades() {
+            const upgradeList = document.getElementById('upgradeList');
+            upgradeList.innerHTML = '';
+            for (const key in gameData.upgrades) {
+                const up = gameData.upgrades[key];
+                const div = document.createElement('div');
+                div.className = 'upgrade-item';
+
+                div.innerHTML = `
+                    <div class="upgrade-info">
+                        <img src="${up.icon}" alt="${up.name}" class="upgrade-icon" />
+                        <div class="upgrade-details">
+                            <div class="upgrade-name">${up.name}</div>
+                            <div class="upgrade-description">${up.description}</div>
+                        </div>
+                    </div>
+                    <div style="display:flex; align-items:center;">
+                        <div class="upgrade-count">x${up.count}</div>
+                        <button class="buy-btn" ${gameData.points < up.cost ? 'disabled' : ''} onclick="buyUpgrade('${key}')">${up.cost}P</button>
+                    </div>
+                `;
+
+                upgradeList.appendChild(div);
+            }
+        }
+
+        // クリック処理
         function clickYajuu(event) {
-            // イベント伝播停止
             if (event) {
                 event.preventDefault();
                 event.stopPropagation();
             }
-            
-            // AudioContext再開（ブラウザポリシー対応）
             if (audioContext && audioContext.state === 'suspended') {
                 audioContext.resume();
             }
-            
             let points = gameData.feverActive ? gameData.clickPower * 5 : gameData.clickPower;
             gameData.points += points;
             gameData.totalClicks++;
-            
-            // クリックエフェクト
+
             showClickEffect(points);
-            
-            // 音声再生
             playSound(clickBuffer, 0.3);
-            
             updateDisplay();
+            saveGame();
         }
-        
-        function showClickEffect(points) {
-            const container = document.querySelector('.yajuu-container');
-            const effect = document.createElement('div');
-            effect.className = 'click-effect';
-            effect.textContent = '+' + formatNumber(points);
-            
-            // ランダムな位置に表示
-            const x = Math.random() * 100 - 50;
-            const y = Math.random() * 100 - 50;
-            effect.style.left = (50 + x * 0.3) + '%';
-            effect.style.top = (50 + y * 0.3) + '%';
-            
-            container.appendChild(effect);
-            
-            setTimeout(() => {
-                container.removeChild(effect);
-            }, 600);
-        }
-        
-        function activateFever() {
-            gameData.feverActive = true;
-            gameData.feverCooldown = true;
-            
-            // フィーバー画像に変更
-            document.getElementById('yajuuImage').src = 'assets/yajuu_fever.png';
-            document.getElementById('feverBtn').disabled = true;
-            document.body.classList.add('fever-mode');
-            
-            // フィーバー音声再生
-            playSound(feverBuffer, 0.5);
-            
-            // タイマー表示
-            let timeLeft = 10;
-            const timerElement = document.getElementById('feverTimer');
-            timerElement.style.display = 'block';
-            timerElement.textContent = `フィーバータイム: ${timeLeft}s`;
-            
-            const timer = setInterval(() => {
-                timeLeft--;
-                timerElement.textContent = `フィーバータイム: ${timeLeft}s`;
-                
-                if (timeLeft <= 0) {
-                    clearInterval(timer);
-                    endFever();
-                }
-            }, 1000);
-        }
-        
-        function endFever() {
-            gameData.feverActive = false;
-            document.getElementById('yajuuImage').src = 'assets/yajuu.png';
-            document.body.classList.remove('fever-mode');
-            document.getElementById('feverTimer').style.display = 'none';
-            
-            // クールダウン開始（30秒）
-            let cooldownTime = 30;
-            const cooldownTimer = setInterval(() => {
-                cooldownTime--;
-                if (cooldownTime <= 0) {
-                    clearInterval(cooldownTimer);
-                    gameData.feverCooldown = false;
-                }
-            }, 1000);
-        }
-        
+
+        // アップグレード購入
         function buyUpgrade(upgradeKey) {
             const upgrade = gameData.upgrades[upgradeKey];
             if (gameData.points >= upgrade.cost) {
                 gameData.points -= upgrade.cost;
                 upgrade.count++;
                 upgrade.cost = Math.floor(upgrade.cost * 1.15);
-                
-                // PPS再計算
+
                 gameData.pointsPerSecond = Object.values(gameData.upgrades)
                     .reduce((total, up) => total + (up.count * up.pps), 0);
-                
+
                 updateDisplay();
+                renderUpgrades();
+                saveGame();
             }
         }
-        
+
+        // クリック強化購入
         function buyClickUpgrade() {
             const cost = gameData.clickPower * 100;
             if (gameData.points >= cost) {
                 gameData.points -= cost;
                 gameData.clickPower++;
                 updateDisplay();
+                saveGame();
             }
         }
-        
-        function updateDisplay() {
-            document.getElementById('points').textContent = formatNumber(gameData.points);
-            document.getElementById('pointsPerSecond').textContent = formatNumber(gameData.pointsPerSecond);
-            document.getElementById('clickPower').textContent = gameData.clickPower;
-            document.getElementById('totalClicks').textContent = formatNumber(gameData.totalClicks);
-            
-            // クリック強化ボタン
-            const clickCost = gameData.clickPower * 100;
-            document.getElementById('clickUpgradeCost').textContent = formatNumber(clickCost);
-            
-            // デバッグ用
-            console.log('現在のポイント:', gameData.points, 'クリック強化コスト:', clickCost);
-            
-            document.getElementById('clickUpgradeBtn').disabled = gameData.points < clickCost;
-            
-            // アップグレードボタンの状態も更新
+
+        // フィーバーモード発動
+        function activateFever() {
+            if (gameData.feverActive || gameData.feverCooldown || gameData.points < 1000) return;
+
+            gameData.points -= 1000;
+            gameData.feverActive = true;
+
+            document.getElementById('yajuuImage').src = 'assets/yajuu_fever.png';
+            document.body.classList.add('fever-mode');
+            document.getElementById('feverBtn').disabled = true;
+
+            let feverTime = 30;
+            const timerEl = document.getElementById('feverTimer');
+            timerEl.style.display = 'block';
+            timerEl.textContent = `フィーバー残り: ${feverTime}s`;
+
+            playSound(feverBuffer, 0.7);
+
+            const feverInterval = setInterval(() => {
+                feverTime--;
+                timerEl.textContent = `フィーバー残り: ${feverTime}s`;
+
+                if (feverTime <= 0) {
+                    clearInterval(feverInterval);
+                    endFever();
+                }
+            }, 1000);
+
+            saveGame();
+        }
+
+        // フィーバー終了処理
+        function endFever() {
+            gameData.feverActive = false;
+            gameData.feverCooldown = true;
+
+            document.getElementById('yajuuImage').src = 'assets/yajuu.png';
+            document.body.classList.remove('fever-mode');
+            document.getElementById('feverTimer').style.display = 'none';
+
+            // クールダウン 30秒
+            let cooldownTime = 30;
+            const cooldownTimer = setInterval(() => {
+                cooldownTime--;
+                if (cooldownTime <= 0) {
+                    clearInterval(cooldownTimer);
+                    gameData.feverCooldown = false;
+                    updateDisplay();
+                    saveGame();
+                }
+            }, 1000);
+
+            updateDisplay();
+            saveGame();
+        }
+
+        // 初期化＆定期処理
+        window.onload = function () {
+            initAudio();
+
+            loadGame();
+            updateDisplay();
             renderUpgrades();
-        }
-        
-        function renderUpgrades() {
-            const upgradeList = document.getElementById('upgradeList');
-            upgradeList.innerHTML = '';
-            
-            Object.entries(gameData.upgrades).forEach(([key, upgrade]) => {
-                const upgradeDiv = document.createElement('div');
-                upgradeDiv.className = 'upgrade-item';
-                
-                upgradeDiv.innerHTML = `
-                    <div class="upgrade-info">
-                        <img src="${upgrade.icon}" alt="${upgrade.name}" class="upgrade-icon">
-                        <div class="upgrade-details">
-                            <div class="upgrade-name">${upgrade.name}</div>
-                            <div class="upgrade-description">${upgrade.description}</div>
-                        </div>
-                    </div>
-                    <div class="upgrade-count">${upgrade.count}</div>
-                    <button class="buy-btn" onclick="buyUpgrade('${key}')" 
-                            ${gameData.points < upgrade.cost ? 'disabled' : ''}>
-                        ${formatNumber(upgrade.cost)}
-                    </button>
-                `;
-                
-                upgradeList.appendChild(upgradeDiv);
-            });
-        }
-        
-        function formatNumber(num) {
-            if (num >= 1e12) return (num / 1e12).toFixed(2) + 'T';
-            if (num >= 1e9) return (num / 1e9).toFixed(2) + 'B';
-            if (num >= 1e6) return (num / 1e6).toFixed(2) + 'M';
-            if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
-            return Math.floor(num).toLocaleString();
-        }
+
+            // 自動でポイントを増やす（毎秒の10分の1ずつ100ms毎に）
+            setInterval(() => {
+                if (gameData.pointsPerSecond > 0) {
+                    gameData.points += gameData.pointsPerSecond / 10;
+                    updateDisplay();
+                    saveGame();
+                }
+            }, 100);
+
+            // フィーバーボタンの状態を定期チェック（保険）
+            setInterval(() => {
+                const feverBtn = document.getElementById('feverBtn');
+                feverBtn.disabled = (gameData.points < 1000 || gameData.feverActive || gameData.feverCooldown);
+            }, 1000);
+        };
     </script>
 </body>
 </html>
