@@ -6,10 +6,10 @@ let gameData = {
     feverActive: false,
     feverCooldown: false,
     upgrades: {
-        takuya: { count: 0, cost: 15, pps: 1, name: 'TAKUYA', icon: 'assets/takuya.png', description: '毎秒1P' },
-        homo: { count: 0, cost: 100, pps: 5, name: 'ホモ', icon: 'assets/homo.png', description: '毎秒5P' },
-        senpai: { count: 0, cost: 1100, pps: 25, name: '先輩', icon: 'assets/senpai.png', description: '毎秒25P' },
-        danshi: { count: 0, cost: 12000, pps: 100, name: '男子学生', icon: 'assets/chugaku.png', description: '毎秒100P' },
+        KBTIT: { count: 0, cost: 15, pps: 1, name: 'KBTIT', icon: 'assets/takuya.png', description: '毎秒1P' },
+        MUR: { count: 0, cost: 100, pps: 5, name: 'MUR', icon: 'assets/mur.png', description: '毎秒5P' },
+        kouhai: { count: 0, cost: 1100, pps: 25, name: '後輩', icon: 'assets/kouhai.png', description: '毎秒25P' },
+        KMR: { count: 0, cost: 12000, pps: 100, name: 'KMR', icon: 'assets/kmr.png', description: '毎秒100P' },
         yajuu: { count: 0, cost: 130000, pps: 500, name: '野獣先輩', icon: 'assets/yajuu.png', description: '毎秒500P' },
         yajuutei: { count: 0, cost: 1400000, pps: 2000, name: '野獣邸', icon: 'assets/yajuutei.png', description: '毎秒2000P' }
     }
