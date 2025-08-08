@@ -148,15 +148,11 @@ window.onload = function () {
     }, 100);
 
     setInterval(() => {
-        if (!gameData.feverActive && !gameData.feverCooldown && gameData.points >= 1000) {
-            document.getElementById('feverBtn').disabled = false;
-        }
-    }, 1000);
-
-    setInterval(() => {
         saveGame();
     }, 5000);
 };
+
+let purchaseIntervalId = null;
 
 function clickYajuu(event) {
     if (event) {
@@ -172,28 +168,32 @@ function clickYajuu(event) {
     gameData.points += points;
     gameData.totalClicks++;
 
+    // フィーバーボタン1/1000の確率で出現（かつフィーバー中、クールダウン中でない時）
+    if (!gameData.feverActive && !gameData.feverCooldown && Math.random() < 0.001) {
+        document.getElementById('feverBtn').style.display = 'inline-block';
+        document.getElementById('feverBtn').disabled = false;
+    }
+
     showClickEffect(points);
     playSound(clickBuffer, 0.3);
     updateDisplay();
     saveGame();
 }
 
-function showClickEffect(points) {
-    const container = document.querySelector('.yajuu-container');
-    const effect = document.createElement('div');
-    effect.className = 'click-effect';
-    effect.textContent = '+' + formatNumber(points);
+function startPurchase(upgradeKey) {
+    buyUpgrade(upgradeKey);
+    if (purchaseIntervalId === null) {
+        purchaseIntervalId = setInterval(() => {
+            buyUpgrade(upgradeKey);
+        }, 100);  // 連打間隔 100ms
+    }
+}
 
-    const x = Math.random() * 100 - 50;
-    const y = Math.random() * 100 - 50;
-    effect.style.left = (50 + x * 0.3) + '%';
-    effect.style.top = (50 + y * 0.3) + '%';
-
-    container.appendChild(effect);
-
-    setTimeout(() => {
-        container.removeChild(effect);
-    }, 600);
+function stopPurchase() {
+    if (purchaseIntervalId !== null) {
+        clearInterval(purchaseIntervalId);
+        purchaseIntervalId = null;
+    }
 }
 
 function activateFever() {
@@ -201,12 +201,13 @@ function activateFever() {
     gameData.feverCooldown = true;
 
     document.getElementById('yajuuImage').src = 'assets/yajuu_fever.png';
+    document.getElementById('feverBtn').style.display = 'none';
     document.getElementById('feverBtn').disabled = true;
     document.body.classList.add('fever-mode');
 
     playSound(feverBuffer, 0.5);
 
-    let timeLeft = 10;
+    let timeLeft = 15;  // 効果時間1.5倍（15秒）
     const timerElement = document.getElementById('feverTimer');
     timerElement.style.display = 'block';
     timerElement.textContent = `フィーバータイム: ${timeLeft}s`;
@@ -244,20 +245,11 @@ function endFever() {
 
 function buyUpgrade(upgradeKey) {
     const upgrade = gameData.upgrades[upgradeKey];
-    let bought = 0;
+    if (gameData.points >= upgrade.cost) {
+        gameData.points -= upgrade.cost;
+        upgrade.count++;
+        upgrade.cost = Math.floor(upgrade.cost * 1.15);
 
-    for (let i = 0; i < buyMultiplier; i++) {
-        if (gameData.points >= upgrade.cost) {
-            gameData.points -= upgrade.cost;
-            upgrade.count++;
-            bought++;
-            upgrade.cost = Math.floor(upgrade.cost * 1.15);
-        } else {
-            break;
-        }
-    }
-
-    if (bought > 0) {
         gameData.pointsPerSecond = Object.values(gameData.upgrades)
             .reduce((total, up) => total + (up.count * up.pps), 0);
         updateDisplay();
@@ -306,7 +298,14 @@ function renderUpgrades() {
                 </div>
             </div>
             <div class="upgrade-count">${upgrade.count}</div>
-            <button class="buy-btn" onclick="buyUpgrade('${key}')" ${gameData.points < upgrade.cost ? 'disabled' : ''}>
+            <button class="buy-btn" 
+                onmousedown="startPurchase('${key}')" 
+                onmouseup="stopPurchase()" 
+                onmouseleave="stopPurchase()"
+                ontouchstart="startPurchase('${key}')" 
+                ontouchend="stopPurchase()" 
+                ontouchcancel="stopPurchase()"
+                ${gameData.points < upgrade.cost ? 'disabled' : ''}>
                 ${formatNumber(upgrade.cost)}
             </button>
         `;
