@@ -6,12 +6,12 @@ let gameData = {
     feverActive: false,
     feverCooldown: false,
     upgrades: {
-        takuya: { count: 0, cost: 15, pps: 1, name: 'TAKUYA', icon: 'assets/takuya.png', description: '毎秒1M' },
-        mur: { count: 0, cost: 100, pps: 5, name: 'MUR', icon: 'assets/mur.png', description: '毎秒5M' },
-        kouhai: { count: 0, cost: 1100, pps: 25, name: '後輩', icon: 'assets/kouhai.png', description: '毎秒25M' },
-        kmr: { count: 0, cost: 12000, pps: 100, name: 'KMR', icon: 'assets/kmr.png', description: '毎秒100M' },
-        yajuu: { count: 0, cost: 130000, pps: 500, name: '野獣先輩', icon: 'assets/yajuu.png', description: '毎秒500M' },
-        yajuutei: { count: 0, cost: 1400000, pps: 2000, name: '野獣邸', icon: 'assets/yajuutei.png', description: '毎秒2000M' }
+        takuya: { count: 0, cost: 15, pps: 1, name: 'TAKUYA', icon: 'assets/takuya.png', description: '毎秒1P' },
+        homo: { count: 0, cost: 100, pps: 5, name: 'ホモ', icon: 'assets/homo.png', description: '毎秒5P' },
+        senpai: { count: 0, cost: 1100, pps: 25, name: '先輩', icon: 'assets/senpai.png', description: '毎秒25P' },
+        danshi: { count: 0, cost: 12000, pps: 100, name: '男子学生', icon: 'assets/chugaku.png', description: '毎秒100P' },
+        yajuu: { count: 0, cost: 130000, pps: 500, name: '野獣先輩', icon: 'assets/yajuu.png', description: '毎秒500P' },
+        yajuutei: { count: 0, cost: 1400000, pps: 2000, name: '野獣邸', icon: 'assets/yajuutei.png', description: '毎秒2000P' }
     }
 };
 
@@ -62,57 +62,29 @@ function playSound(buffer, volume = 0.3) {
     }
 }
 
-// セーブとロード
-function saveGame() {
-    localStorage.setItem('yajuuClickerSave', JSON.stringify(gameData));
-}
-
-function loadGame() {
-    const saved = localStorage.getItem('yajuuClickerSave');
-    if (saved) {
-        try {
-            const loadedData = JSON.parse(saved);
-            Object.assign(gameData, loadedData);
-
-            // 型や関数のないところは復元
-            if (!gameData.upgrades) gameData.upgrades = {};
-            // 可能ならcostを整数にし直す
-            for (const key in gameData.upgrades) {
-                gameData.upgrades[key].cost = Math.floor(gameData.upgrades[key].cost);
-                if (!gameData.upgrades[key].count) gameData.upgrades[key].count = 0;
-            }
-        } catch {
-            // 読み込み失敗なら初期化そのまま
-        }
-    }
-}
-
-// セーブ削除（確認付き）
-function clearSave() {
-    if (confirm('セーブデータを完全に削除しますか？この操作は戻せません。')) {
-        localStorage.removeItem('yajuuClickerSave');
-        location.reload();
-    }
-}
-
 // ページ読み込み時の初期化
 window.onload = function () {
+    // 音声初期化
     initAudio();
 
     // ズーム完全無効化
     document.addEventListener('gesturestart', function (e) {
         e.preventDefault();
     });
+
     document.addEventListener('gesturechange', function (e) {
         e.preventDefault();
     });
+
     document.addEventListener('gestureend', function (e) {
         e.preventDefault();
     });
+
     document.addEventListener('dblclick', function (e) {
         e.preventDefault();
         return false;
     });
+
     document.addEventListener('mousedown', function (e) {
         if (e.detail > 1) {
             e.preventDefault();
@@ -121,35 +93,25 @@ window.onload = function () {
 
     // タッチズーム無効化
     let lastTouchEnd = 0;
-    document.addEventListener(
-        'touchend',
-        function (e) {
-            const now = new Date().getTime();
-            if (now - lastTouchEnd <= 300) {
-                e.preventDefault();
-            }
-            lastTouchEnd = now;
-        },
-        { passive: false }
-    );
+    document.addEventListener('touchend', function (e) {
+        const now = (new Date()).getTime();
+        if (now - lastTouchEnd <= 300) {
+            e.preventDefault();
+        }
+        lastTouchEnd = now;
+    }, { passive: false });
 
     // ピンチズーム無効化
-    document.addEventListener(
-        'touchmove',
-        function (e) {
-            if (e.touches.length > 1) {
-                e.preventDefault();
-            }
-        },
-        { passive: false }
-    );
-
-    loadGame();
+    document.addEventListener('touchmove', function (e) {
+        if (e.touches.length > 1) {
+            e.preventDefault();
+        }
+    }, { passive: false });
 
     updateDisplay();
     renderUpgrades();
 
-    // 自動獲得のタイマー (0.1秒ごと)
+    // 自動獲得のタイマー
     setInterval(() => {
         if (gameData.pointsPerSecond > 0) {
             gameData.points += gameData.pointsPerSecond / 10;
@@ -163,27 +125,6 @@ window.onload = function () {
             document.getElementById('feverBtn').disabled = false;
         }
     }, 1000);
-
-    // 1秒ごとにセーブ
-    setInterval(() => {
-        saveGame();
-    }, 1000);
-
-    // セーブ削除ボタンを表示（bodyの一番下に）
-    const clearBtn = document.createElement('button');
-    clearBtn.textContent = 'セーブ削除';
-    clearBtn.style.position = 'fixed';
-    clearBtn.style.bottom = '10px';
-    clearBtn.style.right = '10px';
-    clearBtn.style.background = 'rgba(255,255,255,0.2)';
-    clearBtn.style.border = 'none';
-    clearBtn.style.color = 'white';
-    clearBtn.style.padding = '8px 12px';
-    clearBtn.style.borderRadius = '8px';
-    clearBtn.style.cursor = 'pointer';
-    clearBtn.style.zIndex = '9999';
-    clearBtn.addEventListener('click', clearSave);
-    document.body.appendChild(clearBtn);
 };
 
 function clickYajuu(event) {
@@ -200,39 +141,21 @@ function clickYajuu(event) {
     gameData.points += points;
     gameData.totalClicks++;
 
-    // クリックエフェクトをクリックした場所に表示
-    showClickEffect(event, points);
-
+    showClickEffect(points);
     playSound(clickBuffer, 0.3);
-
     updateDisplay();
 }
 
-function showClickEffect(event, points) {
+function showClickEffect(points) {
     const container = document.querySelector('.yajuu-container');
     const effect = document.createElement('div');
     effect.className = 'click-effect';
     effect.textContent = '+' + formatNumber(points);
 
-    // マウスまたはタッチの座標取得
-    let x, y;
-    if (event.touches && event.touches.length > 0) {
-        x = event.touches[0].clientX;
-        y = event.touches[0].clientY;
-    } else {
-        x = event.clientX;
-        y = event.clientY;
-    }
-
-    // containerの位置を取得
-    const rect = container.getBoundingClientRect();
-
-    // 相対位置を計算
-    const relX = x - rect.left;
-    const relY = y - rect.top;
-
-    effect.style.left = relX + 'px';
-    effect.style.top = relY + 'px';
+    const x = Math.random() * 100 - 50;
+    const y = Math.random() * 100 - 50;
+    effect.style.left = (50 + x * 0.3) + '%';
+    effect.style.top = (50 + y * 0.3) + '%';
 
     container.appendChild(effect);
 
@@ -290,10 +213,8 @@ function buyUpgrade(upgradeKey) {
         upgrade.count++;
         upgrade.cost = Math.floor(upgrade.cost * 1.15);
 
-        gameData.pointsPerSecond = Object.values(gameData.upgrades).reduce(
-            (total, up) => total + up.count * up.pps,
-            0
-        );
+        gameData.pointsPerSecond = Object.values(gameData.upgrades)
+            .reduce((total, up) => total + (up.count * up.pps), 0);
 
         updateDisplay();
     }
@@ -332,15 +253,16 @@ function renderUpgrades() {
 
         upgradeDiv.innerHTML = `
             <div class="upgrade-info">
-                <img src="${upgrade.icon}" alt="${upgrade.name}" class="upgrade-icon" />
+                <img src="${upgrade.icon}" alt="${upgrade.name}" class="upgrade-icon">
                 <div class="upgrade-details">
                     <div class="upgrade-name">${upgrade.name}</div>
                     <div class="upgrade-description">${upgrade.description}</div>
-                    <div class="upgrade-cost">${formatNumber(upgrade.cost)}P</div>
                 </div>
             </div>
             <div class="upgrade-count">${upgrade.count}</div>
-            <button class="buy-btn" onclick="buyUpgrade('${key}')" ${gameData.points < upgrade.cost ? 'disabled' : ''}>${formatNumber(upgrade.cost)}</button>
+            <button class="buy-btn" onclick="buyUpgrade('${key}')" ${gameData.points < upgrade.cost ? 'disabled' : ''}>
+                ${formatNumber(upgrade.cost)}
+            </button>
         `;
 
         upgradeList.appendChild(upgradeDiv);
