@@ -265,7 +265,6 @@ function buyUpgrade(upgradeKey) {
     }
 }
 
-
 function buyClickUpgrade() {
     const cost = gameData.clickPower * 100;
     if (gameData.points >= cost) {
