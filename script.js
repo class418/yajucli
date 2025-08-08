@@ -17,6 +17,15 @@ let gameData = {
 
 let audioContext;
 let clickBuffer, feverBuffer;
+let buyMultiplier = 1;
+
+function setBuyMultiplier(n) {
+    buyMultiplier = n;
+
+    // ボタンのactiveクラス切り替え
+    document.querySelectorAll('.multiplier-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById('multiplier' + n).classList.add('active');
+}
 
 async function initAudio() {
     try {
@@ -235,18 +244,27 @@ function endFever() {
 
 function buyUpgrade(upgradeKey) {
     const upgrade = gameData.upgrades[upgradeKey];
-    if (gameData.points >= upgrade.cost) {
-        gameData.points -= upgrade.cost;
-        upgrade.count++;
-        upgrade.cost = Math.floor(upgrade.cost * 1.15);
+    let bought = 0;
 
+    for (let i = 0; i < buyMultiplier; i++) {
+        if (gameData.points >= upgrade.cost) {
+            gameData.points -= upgrade.cost;
+            upgrade.count++;
+            bought++;
+            upgrade.cost = Math.floor(upgrade.cost * 1.15);
+        } else {
+            break;
+        }
+    }
+
+    if (bought > 0) {
         gameData.pointsPerSecond = Object.values(gameData.upgrades)
             .reduce((total, up) => total + (up.count * up.pps), 0);
-
         updateDisplay();
         saveGame();
     }
 }
+
 
 function buyClickUpgrade() {
     const cost = gameData.clickPower * 100;
