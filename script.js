@@ -15,7 +15,6 @@ let gameData = {
     }
 };
 
-// 音声関連
 let audioContext;
 let clickBuffer, feverBuffer;
 
@@ -23,7 +22,6 @@ async function initAudio() {
     try {
         audioContext = new (window.AudioContext || window.webkitAudioContext)();
 
-        // 音声ファイルを読み込み
         const [clickResponse, feverResponse] = await Promise.all([
             fetch('assets/click.mp3').catch(() => null),
             fetch('assets/fever.mp3').catch(() => null)
@@ -62,69 +60,93 @@ function playSound(buffer, volume = 0.3) {
     }
 }
 
-// ページ読み込み時の初期化
+function saveGame() {
+    try {
+        localStorage.setItem('yajuuClickerSave', JSON.stringify(gameData));
+    } catch (e) {
+        console.log('セーブ失敗:', e);
+    }
+}
+
+function loadGame() {
+    const saved = localStorage.getItem('yajuuClickerSave');
+    if (saved) {
+        try {
+            const data = JSON.parse(saved);
+
+            gameData.points = data.points || 0;
+            gameData.pointsPerSecond = data.pointsPerSecond || 0;
+            gameData.clickPower = data.clickPower || 1;
+            gameData.totalClicks = data.totalClicks || 0;
+            gameData.feverActive = data.feverActive || false;
+            gameData.feverCooldown = data.feverCooldown || false;
+
+            if (data.upgrades) {
+                Object.keys(gameData.upgrades).forEach(key => {
+                    if (data.upgrades[key]) {
+                        gameData.upgrades[key].count = data.upgrades[key].count || 0;
+                        gameData.upgrades[key].cost = data.upgrades[key].cost || gameData.upgrades[key].cost;
+                    }
+                });
+            }
+
+            // PPS再計算
+            gameData.pointsPerSecond = Object.values(gameData.upgrades)
+                .reduce((total, up) => total + (up.count * up.pps), 0);
+        } catch (e) {
+            console.log('セーブデータの読み込み失敗', e);
+        }
+    }
+}
+
 window.onload = function () {
-    // 音声初期化
     initAudio();
 
-    // ズーム完全無効化
-    document.addEventListener('gesturestart', function (e) {
-        e.preventDefault();
-    });
+    document.addEventListener('gesturestart', e => e.preventDefault());
+    document.addEventListener('gesturechange', e => e.preventDefault());
+    document.addEventListener('gestureend', e => e.preventDefault());
 
-    document.addEventListener('gesturechange', function (e) {
-        e.preventDefault();
-    });
-
-    document.addEventListener('gestureend', function (e) {
-        e.preventDefault();
-    });
-
-    document.addEventListener('dblclick', function (e) {
+    document.addEventListener('dblclick', e => {
         e.preventDefault();
         return false;
     });
 
-    document.addEventListener('mousedown', function (e) {
-        if (e.detail > 1) {
-            e.preventDefault();
-        }
+    document.addEventListener('mousedown', e => {
+        if (e.detail > 1) e.preventDefault();
     });
 
-    // タッチズーム無効化
     let lastTouchEnd = 0;
-    document.addEventListener('touchend', function (e) {
-        const now = (new Date()).getTime();
-        if (now - lastTouchEnd <= 300) {
-            e.preventDefault();
-        }
+    document.addEventListener('touchend', e => {
+        const now = Date.now();
+        if (now - lastTouchEnd <= 300) e.preventDefault();
         lastTouchEnd = now;
     }, { passive: false });
 
-    // ピンチズーム無効化
-    document.addEventListener('touchmove', function (e) {
-        if (e.touches.length > 1) {
-            e.preventDefault();
-        }
+    document.addEventListener('touchmove', e => {
+        if (e.touches.length > 1) e.preventDefault();
     }, { passive: false });
 
+    loadGame();
     updateDisplay();
     renderUpgrades();
 
-    // 自動獲得のタイマー
     setInterval(() => {
         if (gameData.pointsPerSecond > 0) {
             gameData.points += gameData.pointsPerSecond / 10;
             updateDisplay();
+            saveGame();
         }
     }, 100);
 
-    // フィーバーボタンのクールダウンチェック
     setInterval(() => {
         if (!gameData.feverActive && !gameData.feverCooldown && gameData.points >= 1000) {
             document.getElementById('feverBtn').disabled = false;
         }
     }, 1000);
+
+    setInterval(() => {
+        saveGame();
+    }, 5000);
 };
 
 function clickYajuu(event) {
@@ -144,6 +166,7 @@ function clickYajuu(event) {
     showClickEffect(points);
     playSound(clickBuffer, 0.3);
     updateDisplay();
+    saveGame();
 }
 
 function showClickEffect(points) {
@@ -188,6 +211,8 @@ function activateFever() {
             endFever();
         }
     }, 1000);
+
+    saveGame();
 }
 
 function endFever() {
@@ -204,6 +229,8 @@ function endFever() {
             gameData.feverCooldown = false;
         }
     }, 1000);
+
+    saveGame();
 }
 
 function buyUpgrade(upgradeKey) {
@@ -217,6 +244,7 @@ function buyUpgrade(upgradeKey) {
             .reduce((total, up) => total + (up.count * up.pps), 0);
 
         updateDisplay();
+        saveGame();
     }
 }
 
@@ -226,6 +254,7 @@ function buyClickUpgrade() {
         gameData.points -= cost;
         gameData.clickPower++;
         updateDisplay();
+        saveGame();
     }
 }
 
