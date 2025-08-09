@@ -166,6 +166,7 @@ function loadGame() {
 }
 
 window.onload = function () {
+    eruda.init();
     initAudio();
     // 匿名IDを画面に表示
   const anonSpan = document.getElementById('anonIdDisplay');
