@@ -71,6 +71,7 @@ function playSound(buffer, volume = 0.3) {
 
 // --- 匿名ユーザーID取得 ---
 function getAnonId() {
+  console.log('getAnonId called';
   let id = localStorage.getItem('anonId');
   if (!id) {
     id = 'anon-' + Date.now() + '-' + Math.random().toString(36).slice(2);
