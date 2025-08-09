@@ -32,8 +32,8 @@ async function initAudio() {
         audioContext = new (window.AudioContext || window.webkitAudioContext)();
 
         const [clickResponse, feverResponse] = await Promise.all([
-            fetch('assets/click.mp3').catch(() => null),
-            fetch('assets/fever.mp3').catch(() => null)
+            fetch('/assets/click.mp3').catch(() => null),
+            fetch('/assets/fever.mp3').catch(() => null)
         ]);
 
         if (clickResponse) {
