@@ -165,7 +165,11 @@ function loadGame() {
 
 window.onload = function () {
     initAudio();
-
+    // 匿名IDを画面に表示
+  const anonSpan = document.getElementById('anonIdDisplay');
+  if (anonSpan) {
+    anonSpan.textContent = getAnonId();
+  }
     document.addEventListener('gesturestart', e => e.preventDefault());
     document.addEventListener('gesturechange', e => e.preventDefault());
     document.addEventListener('gestureend', e => e.preventDefault());
