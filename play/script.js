@@ -200,7 +200,7 @@ function activateFever() {
     gameData.feverActive = true;
     gameData.feverCooldown = true;
 
-    document.getElementById('yajuuImage').src = 'assets/yajuu_fever.png';
+    document.getElementById('yajuuImage').src = '/assets/yajuu_fever.png';
     document.getElementById('feverBtn').disabled = true;
     document.body.classList.add('fever-mode');
 
@@ -226,7 +226,7 @@ function activateFever() {
 
 function endFever() {
     gameData.feverActive = false;
-    document.getElementById('yajuuImage').src = 'assets/yajuu.png';
+    document.getElementById('yajuuImage').src = '/assets/yajuu.png';
     document.body.classList.remove('fever-mode');
     document.getElementById('feverTimer').style.display = 'none';
 
