@@ -1,3 +1,4 @@
+console.log("script js loaded");
 let gameData = {
     points: 0,
     pointsPerSecond: 0,
