@@ -121,11 +121,12 @@ window.onload = function () {
     });
 
     document.addEventListener('mousedown', e => {
-        if (e.detail > 1) e.preventDefault();
+        if (e.detail > 1 && !e.target.closest('.buy-btn')) e.preventDefault();
     });
 
     let lastTouchEnd = 0;
     document.addEventListener('touchend', e => {
+        if (e.target.closest('.buy-btn')) return; // ボタンは除外
         const now = Date.now();
         if (now - lastTouchEnd <= 300) e.preventDefault();
         lastTouchEnd = now;
