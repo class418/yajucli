@@ -70,70 +70,13 @@ function playSound(buffer, volume = 0.3) {
     }
 }
 
-// --- 匿名ユーザーID取得 ---
-function getAnonId() {
-  try {
-    let id = localStorage.getItem('anonId');
-    if (!id) {
-      id = 'anon-' + Date.now() + '-' + Math.random().toString(36).slice(2);
-      localStorage.setItem('anonId', id);
-      console.log('anonId saved:', id);
-    }
-    return id;
-  } catch (e) {
-    console.error('localStorage操作エラー:', e);
-    return 'anon-fallback-' + Date.now();
-  }
-}
-
-// --- サーバーにポイント送信 ---
-function sendPointsToServer() {
-  fetch('/api/save_points.php', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({
-      anonId: getAnonId(),
-      points: gameData.points
-    }),
-  })
-  .then(res => res.json())
-  .then(json => {
-    if (json.error) console.error('ポイント保存エラー:', json.error);
-  })
-  .catch(err => console.error('通信失敗:', err));
-}
-
-let saveTimer = null;
-
-function scheduleSave() {
-  if (saveTimer) return;
-  saveTimer = setTimeout(() => {
-    sendPointsToServer();
-    saveTimer = null;
-  }, 60000);
-}
-
 function saveGame() {
   try {
     localStorage.setItem('yajuuClickerSave', JSON.stringify(gameData));
-    scheduleSave();
   } catch (e) {
     console.log('セーブ失敗:', e);
   }
 }
-
-window.addEventListener('beforeunload', () => {
-  if (!navigator.sendBeacon) return;
-
-  const data = JSON.stringify({
-    anonId: getAnonId(),
-    points: gameData.points
-  });
-
-  const blob = new Blob([data], { type: 'application/json' });
-
-  navigator.sendBeacon('/api/save_points.php', blob);
-});
 
 function loadGame() {
     const saved = localStorage.getItem('yajuuClickerSave');
@@ -167,11 +110,6 @@ function loadGame() {
 
 window.onload = function () {
     initAudio();
-
-    const anonSpan = document.getElementById('anonIdDisplay');
-    if (anonSpan) {
-      anonSpan.textContent = getAnonId();
-    }
 
     document.addEventListener('gesturestart', e => e.preventDefault());
     document.addEventListener('gesturechange', e => e.preventDefault());
@@ -349,12 +287,6 @@ function updateDisplay() {
     document.getElementById('clickUpgradeBtn').disabled = gameData.points < clickCost;
 
     renderUpgrades();
-
-    // 匿名ID表示もここで更新
-    const anonSpan = document.getElementById('anonIdDisplay');
-    if (anonSpan) {
-        anonSpan.textContent = getAnonId();
-    }
 }
 
 function renderUpgrades() {
