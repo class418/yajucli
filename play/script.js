@@ -7,6 +7,7 @@ let gameData = {
     totalClicks: 0,
     feverActive: false,
     feverCooldown: false,
+    feverCooldownEndTime: 0,  // 追加：クールダウン終了予定時刻（ミリ秒）
     upgrades: {
         KBTIT: { count: 0, cost: 15, pps: 1, name: 'KBTIT', icon: '/assets/takuya.png', description: '毎秒1P' },
         MUR: { count: 0, cost: 100, pps: 5, name: 'MUR', icon: '/assets/mur.png', description: '毎秒5P' },
@@ -91,6 +92,7 @@ function loadGame() {
             gameData.totalClicks = data.totalClicks || 0;
             gameData.feverActive = data.feverActive || false;
             gameData.feverCooldown = data.feverCooldown || false;
+            gameData.feverCooldownEndTime = data.feverCooldownEndTime || 0;
 
             if (data.upgrades) {
                 Object.keys(gameData.upgrades).forEach(key => {
@@ -103,6 +105,16 @@ function loadGame() {
 
             gameData.pointsPerSecond = Object.values(gameData.upgrades)
                 .reduce((total, up) => total + (up.count * up.pps), 0);
+
+            // クールダウンが残っているならタイマーを開始
+            if (gameData.feverCooldown && gameData.feverCooldownEndTime > Date.now()) {
+                startFeverCooldownTimer();
+            } else {
+                // 過ぎていたらリセット
+                gameData.feverCooldown = false;
+                gameData.feverCooldownEndTime = 0;
+            }
+
         } catch (e) {
             console.log('セーブデータの読み込み失敗', e);
         }
@@ -235,27 +247,44 @@ function endFever() {
     document.body.classList.remove('fever-mode');
     document.getElementById('feverTimer').style.display = 'none';
 
-    // 既存のクールダウンタイマーがあればクリア
     if (feverCooldownInterval !== null) {
         clearInterval(feverCooldownInterval);
         feverCooldownInterval = null;
     }
 
     gameData.feverCooldown = true;
+    gameData.feverCooldownEndTime = Date.now() + 30000; // 30秒後
 
-    let cooldownTime = 30;
+    saveGame();
+
+    startFeverCooldownTimer();
+}
+
+function startFeverCooldownTimer() {
+    if (feverCooldownInterval !== null) {
+        clearInterval(feverCooldownInterval);
+        feverCooldownInterval = null;
+    }
+
+    const timerElement = document.getElementById('feverTimer');
+    timerElement.style.display = 'block';
+
     feverCooldownInterval = setInterval(() => {
-        cooldownTime--;
-        if (cooldownTime <= 0) {
+        const remainingMs = gameData.feverCooldownEndTime - Date.now();
+        if (remainingMs <= 0) {
             clearInterval(feverCooldownInterval);
             feverCooldownInterval = null;
             gameData.feverCooldown = false;
+            gameData.feverCooldownEndTime = 0;
+            timerElement.style.display = 'none';
             updateFeverBtn();
             saveGame();
+        } else {
+            const sec = Math.ceil(remainingMs / 1000);
+            timerElement.textContent = `フィーバークールダウン: ${sec}s`;
+            updateFeverBtn();
         }
-    }, 1000);
-
-    saveGame();
+    }, 200);
 }
 
 function buyUpgrade(upgradeKey) {
