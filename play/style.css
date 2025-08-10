@@ -253,7 +253,11 @@ body {
     cursor: pointer;
     transition: transform 0.2s ease;
     min-width: 80px;
+
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
 }
+
 
 .buy-btn:hover {
     transform: translateY(-2px);
