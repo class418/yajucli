@@ -1,4 +1,5 @@
 console.log('script js loaded');
+
 let gameData = {
     points: 0,
     pointsPerSecond: 0,
@@ -23,7 +24,6 @@ let buyMultiplier = 1;
 function setBuyMultiplier(n) {
     buyMultiplier = n;
 
-    // ボタンのactiveクラス切り替え
     document.querySelectorAll('.multiplier-btn').forEach(btn => btn.classList.remove('active'));
     document.getElementById('multiplier' + n).classList.add('active');
 }
@@ -72,13 +72,18 @@ function playSound(buffer, volume = 0.3) {
 
 // --- 匿名ユーザーID取得 ---
 function getAnonId() {
-  console.log('getAnonId called');
-  let id = localStorage.getItem('anonId');
-  if (!id) {
-    id = 'anon-' + Date.now() + '-' + Math.random().toString(36).slice(2);
-    localStorage.setItem('anonId', id);
+  try {
+    let id = localStorage.getItem('anonId');
+    if (!id) {
+      id = 'anon-' + Date.now() + '-' + Math.random().toString(36).slice(2);
+      localStorage.setItem('anonId', id);
+      console.log('anonId saved:', id);
+    }
+    return id;
+  } catch (e) {
+    console.error('localStorage操作エラー:', e);
+    return 'anon-fallback-' + Date.now();
   }
-  return id;
 }
 
 // --- サーバーにポイント送信 ---
@@ -98,28 +103,25 @@ function sendPointsToServer() {
   .catch(err => console.error('通信失敗:', err));
 }
 
-// --- 送信予約（1分間隔で送信） ---
 let saveTimer = null;
 
 function scheduleSave() {
-  if (saveTimer) return; // 予約済みなら何もしない
+  if (saveTimer) return;
   saveTimer = setTimeout(() => {
     sendPointsToServer();
     saveTimer = null;
-  }, 60000); // 60秒後に送信
+  }, 60000);
 }
 
-// --- 既存のsaveGame()内でscheduleSave()を呼ぶ例 ---
 function saveGame() {
   try {
     localStorage.setItem('yajuuClickerSave', JSON.stringify(gameData));
-    scheduleSave(); // 送信予約
+    scheduleSave();
   } catch (e) {
     console.log('セーブ失敗:', e);
   }
 }
 
-// --- ページ離脱時に最新データを送信 ---
 window.addEventListener('beforeunload', () => {
   if (!navigator.sendBeacon) return;
 
@@ -132,7 +134,6 @@ window.addEventListener('beforeunload', () => {
 
   navigator.sendBeacon('/api/save_points.php', blob);
 });
-
 
 function loadGame() {
     const saved = localStorage.getItem('yajuuClickerSave');
@@ -156,7 +157,6 @@ function loadGame() {
                 });
             }
 
-            // PPS再計算
             gameData.pointsPerSecond = Object.values(gameData.upgrades)
                 .reduce((total, up) => total + (up.count * up.pps), 0);
         } catch (e) {
@@ -167,11 +167,12 @@ function loadGame() {
 
 window.onload = function () {
     initAudio();
-    // 匿名IDを画面に表示
-  const anonSpan = document.getElementById('anonIdDisplay');
-  if (anonSpan) {
-    anonSpan.textContent = getAnonId();
-  }
+
+    const anonSpan = document.getElementById('anonIdDisplay');
+    if (anonSpan) {
+      anonSpan.textContent = getAnonId();
+    }
+
     document.addEventListener('gesturestart', e => e.preventDefault());
     document.addEventListener('gesturechange', e => e.preventDefault());
     document.addEventListener('gestureend', e => e.preventDefault());
@@ -348,6 +349,12 @@ function updateDisplay() {
     document.getElementById('clickUpgradeBtn').disabled = gameData.points < clickCost;
 
     renderUpgrades();
+
+    // 匿名ID表示もここで更新
+    const anonSpan = document.getElementById('anonIdDisplay');
+    if (anonSpan) {
+        anonSpan.textContent = getAnonId();
+    }
 }
 
 function renderUpgrades() {
