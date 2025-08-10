@@ -20,6 +20,7 @@ let gameData = {
 let audioContext;
 let clickBuffer, feverBuffer;
 let buyMultiplier = 1;
+let feverCooldownInterval = null;
 
 function setBuyMultiplier(n) {
     buyMultiplier = n;
@@ -71,11 +72,11 @@ function playSound(buffer, volume = 0.3) {
 }
 
 function saveGame() {
-  try {
-    localStorage.setItem('yajuuClickerSave', JSON.stringify(gameData));
-  } catch (e) {
-    console.log('セーブ失敗:', e);
-  }
+    try {
+        localStorage.setItem('yajuuClickerSave', JSON.stringify(gameData));
+    } catch (e) {
+        console.log('セーブ失敗:', e);
+    }
 }
 
 function loadGame() {
@@ -149,15 +150,18 @@ window.onload = function () {
     }, 100);
 
     setInterval(() => {
-        if (!gameData.feverActive && !gameData.feverCooldown && gameData.points >= 1000) {
-            document.getElementById('feverBtn').disabled = false;
-        }
-    }, 1000);
+        updateFeverBtn();
+    }, 500);
 
     setInterval(() => {
         saveGame();
     }, 5000);
 };
+
+function updateFeverBtn() {
+    const feverBtn = document.getElementById('feverBtn');
+    feverBtn.disabled = gameData.feverActive || gameData.feverCooldown || gameData.points < 1000;
+}
 
 function clickYajuu(event) {
     if (event) {
@@ -202,7 +206,7 @@ function activateFever() {
     gameData.feverCooldown = true;
 
     document.getElementById('yajuuImage').src = '/assets/yajuu_fever.png';
-    document.getElementById('feverBtn').disabled = true;
+    updateFeverBtn();
     document.body.classList.add('fever-mode');
 
     playSound(feverBuffer, 0.5);
@@ -231,12 +235,23 @@ function endFever() {
     document.body.classList.remove('fever-mode');
     document.getElementById('feverTimer').style.display = 'none';
 
+    // 既存のクールダウンタイマーがあればクリア
+    if (feverCooldownInterval !== null) {
+        clearInterval(feverCooldownInterval);
+        feverCooldownInterval = null;
+    }
+
+    gameData.feverCooldown = true;
+
     let cooldownTime = 30;
-    const cooldownTimer = setInterval(() => {
+    feverCooldownInterval = setInterval(() => {
         cooldownTime--;
         if (cooldownTime <= 0) {
-            clearInterval(cooldownTimer);
+            clearInterval(feverCooldownInterval);
+            feverCooldownInterval = null;
             gameData.feverCooldown = false;
+            updateFeverBtn();
+            saveGame();
         }
     }, 1000);
 
@@ -287,6 +302,7 @@ function updateDisplay() {
 
     document.getElementById('clickUpgradeBtn').disabled = gameData.points < clickCost;
 
+    updateFeverBtn();
     renderUpgrades();
 }
 
