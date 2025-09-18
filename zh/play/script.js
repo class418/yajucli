@@ -11,7 +11,7 @@ let gameData = {
         MUR: { count: 0, cost: 100, pps: 5, name: 'MUR', icon: '/assets/mur.png', description: '每秒5P' },
         kouhai: { count: 0, cost: 1100, pps: 25, name: '后辈', icon: '/assets/kouhai.png', description: '每秒25P' },
         KMR: { count: 0, cost: 12000, pps: 100, name: 'KMR', icon: '/assets/kmr.png', description: '每秒100P' },
-        yajuu: { count: 0, cost: 130000, pps: 500, name: '野兽前辈', icon: '/assets/yajuu.png', description: '每秒500P' },
+        yajuu: { count: 0, cost: 130000, pps: 500, name: '野兽先辈', icon: '/assets/yajuu.png', description: '每秒500P' },
         yajuutei: { count: 0, cost: 1400000, pps: 2000, name: '野兽宅', icon: '/assets/yajuutei.png', description: '每秒2000P' }
     }
 };
