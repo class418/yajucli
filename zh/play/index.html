@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+    <title>野獣先輩クリッカー - 最強の連打ゲーム</title>
+
+    <meta name="description" content="野獣先輩をクリックして淫夢ポイントを稼ごう！シンプルで熱い連打ゲーム。アップグレードでさらに強化しよう。" />
+    <meta name="keywords" content="野獣先輩, クリッカー, 連打ゲーム, 淫夢, 野獣先輩クリッカー" />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="mzvunaro" />
+    <link rel="canonical" href="https://tshoko.online/" />
+
+    <link rel="stylesheet" href="/play/style.css" />
+
+    <!-- ファビコン設定 -->
+    <link rel="icon" type="image/png" href="/favicon/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png" />
+    <link rel="manifest" href="/favicon/site.webmanifest" />
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h1 class="title">野獣先輩クリッカー</h1>
+        </div>
+     <div class="line-it-button" data-lang="ja" data-type="share-a" data-env="REAL" data-url="https://tshoko.online/share" data-color="default" data-size="small" data-count="true" data-ver="3" style="display: none;"></div>
+<script src="https://www.line-website.com/social-plugins/js/thirdparty/loader.min.js" async="async" defer="defer"></script>
+
+        <a href="https://twitter.com/share?url=https://tshoko.online/share" 
+   class="twitter-share-button" 
+   data-show-count="false">
+  Tweet
+</a>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-value" id="points">0</div>
+                <div class="stat-label">淫夢ポイント</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="pointsPerSecond">0</div>
+                <div class="stat-label">毎秒獲得</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="clickPower">1</div>
+                <div class="stat-label">クリック力</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalClicks">0</div>
+                <div class="stat-label">総クリック数</div>
+            </div>
+        </div>
+
+        <div class="game-area">
+            <div class="click-area">
+                <div class="yajuu-container">
+                    <img src="/assets/yajuu.png" alt="野獣先輩" class="yajuu-image" id="yajuuImage"
+                         onmousedown="clickYajuu(event)"
+                         ontouchstart="clickYajuu(event)"
+                         ondragstart="return false;"
+                         oncontextmenu="return false;">
+                </div>
+
+                <button class="fever-btn" id="feverBtn" onclick="activateFever()" disabled>
+                    <img src="/assets/feverbtn.png" alt="フィーバー" />
+                </button>
+
+                <div class="fever-timer" id="feverTimer" style="display: none;"></div>
+
+                <div style="margin-top: 20px;">
+                    <button class="buy-btn" onclick="buyClickUpgrade()" id="clickUpgradeBtn">
+                        クリック強化<br /><span id="clickUpgradeCost">100</span>P
+                    </button>
+                </div>
+            </div>
+
+            <div class="upgrades">
+                <h2 class="upgrades-title">🏠 アップグレード</h2>
+                <div id="upgradeList"></div>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
