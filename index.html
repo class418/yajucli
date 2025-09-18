@@ -21,24 +21,6 @@
 
 </head>
 <body class="font-sans min-h-screen max-h-full">
-  <script>
-async function redirectIfChina() {
-    try {
-        // IP情報取得API（無料プランあり）
-        const res = await fetch('https://ipapi.co/json/');
-        const data = await res.json();
-
-        if (data.country_code === 'CN') {
-            // 中国からのアクセスなら /zh にリダイレクト
-            window.location.href = '/zh';
-        }
-    } catch (e) {
-        console.log('IP判定失敗:', e);
-    }
-}
-
-redirectIfChina();
-</script>
 
   <nav class="bg-amber-800 text-white shadow-md">
     <div class="max-w-4xl mx-auto px-4 py-3 flex justify-between items-center">
